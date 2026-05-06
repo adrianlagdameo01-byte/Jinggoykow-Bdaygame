@@ -1,34 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>For Jinggoykow 💖</title>
+
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: Arial;
+    background: linear-gradient(#87CEEB, #ffffff);
+    touch-action: none; /* 🚨 prevents scroll on mobile */
+}
+
+canvas {
+    display: block;
+}
+
+/* UI */
+#ui {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 18px;
+    z-index: 5;
+}
+
+/* screens */
+.screen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.95);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    z-index: 10;
+    padding: 20px;
+}
+
+/* buttons */
+button {
+    padding: 12px 20px;
+    font-size: 16px;
+    background: hotpink;
+    border: none;
+    color: white;
+    border-radius: 10px;
+}
+
+/* MOBILE CONTROLS */
+#controls {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 30px;
+    z-index: 15;
+}
+
+.ctrl {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28px;
+    user-select: none;
+}
+</style>
+</head>
+
+<body>
+
+<div id="ui">❤️ <span id="score">0</span>/5</div>
+
+<canvas id="game"></canvas>
+
+<div id="message" class="screen">
+    <h2>🎉 You unlocked your message 💖</h2>
+    <p style="max-width:600px;">
+        ✨ Happy Birthday Jinggoykow 🥳💖<br><br>
+        (Paste your full message here)
+    </p>
+</div>
+
+<div id="gameover" class="screen">
+    <h2>💀 Try Again</h2>
+    <button onclick="resetGame()">Retry</button>
+</div>
+
+<!-- MOBILE BUTTONS -->
+<div id="controls">
+    <div class="ctrl" id="left">⬅️</div>
+    <div class="ctrl" id="jump">⬆️</div>
+    <div class="ctrl" id="right">➡️</div>
+</div>
+
 <script>
 let canvas, ctx;
-let player, hearts, spikes, goal, score;
+let player, hearts, spikes, goal;
+let score = 0;
 let gravity = 0.6;
 let keys = {};
-let gameRunning = false;
-let winTriggered = false;
+let gameRunning = true;
 
-const finalMessage = `
-✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎉🎂✨✨✨
-
-Tanda mo naaaaaa! Char lang 🤭
-
-But seriously, I really wish I could spend this whole day with you...
-
-I know things haven’t been easy, but I’m still here.
-
-Mahal na mahal kita ❤️
-
-—Maximow 🥰
-`;
-
-/* INIT CANVAS */
+/* INIT */
 function initCanvas(){
     canvas = document.getElementById("game");
     ctx = canvas.getContext("2d");
+
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 }
 
-/* RESET GAME */
 function init(){
     player = {x:50,y:300,dy:0,onGround:false};
 
@@ -45,46 +136,67 @@ function init(){
         {x:900,y:330}
     ];
 
-    goal = {x:1300,y:300};
+    goal = {x:1200,y:300};
 
     score = 0;
-    winTriggered = false;
+    gameRunning = true;
 
     document.getElementById("score").innerText = score;
-    document.getElementById("gameover").style.display = "none";
-    document.getElementById("message").style.display = "none";
+    document.getElementById("message").style.display="none";
+    document.getElementById("gameover").style.display="none";
 }
 
-/* CONTROLS */
+/* INPUT (keyboard + touch) */
 document.addEventListener("keydown",e=>keys[e.key]=true);
 document.addEventListener("keyup",e=>keys[e.key]=false);
 
-/* DRAW PLAYER */
-function drawPlayer(){
+/* TOUCH CONTROLS */
+function bindHold(id, key){
+    let el = document.getElementById(id);
+
+    el.addEventListener("touchstart", e=>{
+        e.preventDefault();
+        keys[key] = true;
+    });
+
+    el.addEventListener("touchend", e=>{
+        keys[key] = false;
+    });
+
+    el.addEventListener("mousedown", ()=>{
+        keys[key] = true;
+    });
+
+    el.addEventListener("mouseup", ()=>{
+        keys[key] = false;
+    });
+}
+
+bindHold("left","ArrowLeft");
+bindHold("right","ArrowRight");
+
+document.getElementById("jump").addEventListener("touchstart", jump);
+document.getElementById("jump").addEventListener("mousedown", jump);
+
+function jump(){
+    if(player.onGround){
+        player.dy = -11;
+        player.onGround = false;
+    }
+}
+
+/* DRAW */
+function draw(){
     ctx.font="30px Arial";
     ctx.fillText("👩",player.x,player.y);
 }
 
-/* GROUND */
 function ground(){
     ctx.fillStyle="green";
     ctx.fillRect(0,350,canvas.width,50);
 }
 
-/* TYPE EFFECT (SMOOTH) */
-function typeText(text){
-    let i = 0;
-    let el = document.getElementById("typed");
-    el.innerHTML = "";
-
-    let interval = setInterval(() => {
-        el.innerHTML += text[i];
-        i++;
-        if (i >= text.length) clearInterval(interval);
-    }, 15);
-}
-
-/* GAME LOOP */
+/* LOOP */
 function loop(){
     if(!gameRunning) return;
 
@@ -92,14 +204,8 @@ function loop(){
 
     ground();
 
-    // movement
     if(keys["ArrowRight"]) player.x += 5;
     if(keys["ArrowLeft"]) player.x -= 5;
-
-    if(keys["ArrowUp"] && player.onGround){
-        player.dy = -11;
-        player.onGround = false;
-    }
 
     player.dy += gravity;
     player.y += player.dy;
@@ -110,68 +216,53 @@ function loop(){
         player.onGround = true;
     }
 
-    /* HEARTS */
+    /* hearts */
     for(let i=0;i<hearts.length;i++){
         let h = hearts[i];
         ctx.fillText("❤️",h.x,h.y);
 
-        if(Math.abs(player.x-h.x)<20 && Math.abs(player.y-h.y)<20){
+        if(Math.abs(player.x-h.x)<20){
             hearts.splice(i,1);
             score++;
-            document.getElementById("score").textContent = score;
+            document.getElementById("score").innerText=score;
             i--;
         }
     }
 
-    /* SPIKES */
+    /* spikes */
     for(let s of spikes){
         ctx.fillText("💀",s.x,s.y);
 
-        if(Math.abs(player.x-s.x)<20 && Math.abs(player.y-s.y)<20){
-            gameRunning = false;
-            document.getElementById("gameover").style.display = "flex";
-            return;
+        if(Math.abs(player.x-s.x)<20){
+            gameRunning=false;
+            document.getElementById("gameover").style.display="flex";
         }
     }
 
-    /* GOAL */
     ctx.fillText("🎁",goal.x,goal.y);
 
-    /* WIN CONDITION (NO LAG FIX) */
-    if(score >= 5 && !winTriggered){
-        winTriggered = true;
-        gameRunning = false;
-
-        // wait 1 frame → prevents freeze spike
-        requestAnimationFrame(() => {
-            document.getElementById("message").style.display = "flex";
-            typeText(finalMessage);
-        });
-
-        return;
+    if(score >= 5){
+        gameRunning=false;
+        document.getElementById("message").style.display="flex";
     }
 
-    drawPlayer();
+    draw();
     requestAnimationFrame(loop);
-}
-
-/* START GAME */
-function startGame(){
-    document.getElementById("intro").style.display = "none";
-    init();
-    gameRunning = true;
-    loop();
 }
 
 /* RESET */
 function resetGame(){
     init();
-    gameRunning = true;
     loop();
 }
 
-/* INIT */
+/* START */
 window.onload = function(){
     initCanvas();
+    init();
+    loop();
 };
 </script>
+
+</body>
+</html>
