@@ -1,67 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>For Jinggoykow 💖</title>
-<style>
-body {
-    margin: 0;
-    overflow: hidden;
-    background: linear-gradient(#87CEEB, #fff);
-    font-family: Arial;
-}
-
-canvas {
-    display: block;
-}
-
-#ui {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 18px;
-}
-
-#message, #gameover {
-    display: none;
-    position: absolute;
-    top: 15%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: white;
-    padding: 20px;
-    border-radius: 15px;
-    max-width: 600px;
-    text-align: center;
-}
-
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    margin-top: 10px;
-}
-</style>
-</head>
-
-<body>
-
-<div id="ui">Hearts: <span id="score">0</span> / 5</div>
-
-<canvas id="game"></canvas>
-
-<div id="message">
-<h2>🎉 You unlocked the message 💖</h2>
-<p>
-✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎉🎂✨✨✨<br><br>
-(Paste your full message here 💖)
-</p>
-</div>
-
-<div id="gameover">
-<h2>💀 Ouch! Try Again 😅</h2>
-<button onclick="resetGame()">Try Again</button>
-</div>
-
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -70,6 +6,9 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let player, hearts, spikes, goal, score;
+let gravity = 0.6;
+let keys = {};
+let gameRunning = true; // ✅ control game state
 
 function init() {
     player = { x: 50, y: 300, dy: 0, onGround: false };
@@ -86,14 +25,14 @@ function init() {
     ];
     goal = { x: 1200, y: 300 };
     score = 0;
+    gameRunning = true;
+
     document.getElementById("score").innerText = score;
     document.getElementById("gameover").style.display = "none";
+    document.getElementById("message").style.display = "none";
 }
 
 init();
-
-let gravity = 0.6;
-let keys = {};
 
 document.addEventListener("keydown", e => keys[e.key] = true);
 document.addEventListener("keyup", e => keys[e.key] = false);
@@ -109,6 +48,8 @@ function drawGround() {
 }
 
 function update() {
+    if (!gameRunning) return; // ✅ STOP GAME
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawGround();
 
@@ -144,8 +85,8 @@ function update() {
     spikes.forEach(s => {
         ctx.fillText("💀", s.x, s.y);
         if (Math.abs(player.x - s.x) < 20 && Math.abs(player.y - s.y) < 20) {
+            gameRunning = false; // ✅ STOP
             document.getElementById("gameover").style.display = "block";
-            return;
         }
     });
 
@@ -153,6 +94,7 @@ function update() {
     ctx.fillText("🎁", goal.x, goal.y);
 
     if (player.x > goal.x && score >= 5) {
+        gameRunning = false;
         document.getElementById("message").style.display = "block";
     }
 
@@ -160,12 +102,11 @@ function update() {
     requestAnimationFrame(update);
 }
 
+// ✅ FIXED RESET
 function resetGame() {
     init();
+    update(); // restart loop
 }
 
 update();
 </script>
-
-</body>
-</html>
