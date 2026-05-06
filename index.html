@@ -1,11 +1,191 @@
 <!DOCTYPE html>
 <html>
+<head>
+<meta charset="UTF-8">
+<title>For Jinggoykow 💖</title>
+
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+    background: linear-gradient(#87CEEB, #fff);
+    font-family: Arial;
+}
+
+canvas {
+    display: block;
+}
+
+#ui {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 18px;
+}
+
+#message, #gameover {
+    display: none;
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    max-width: 650px;
+    text-align: center;
+    max-height: 70vh;
+    overflow-y: auto;
+    z-index: 10;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin-top: 10px;
+}
+</style>
+</head>
+
 <body>
-<h1>TEST PAGE</h1>
+
+<div id="ui">Hearts: <span id="score">0</span> / 5</div>
+
+<canvas id="game"></canvas>
+
+<div id="message">
+<h2>🎉 You unlocked your surprise 💖</h2>
+<p>
+YOUR MESSAGE HERE 💖
+</p>
+</div>
+
+<div id="gameover">
+<h2>💀 Ouch! Try Again 😅</h2>
+<button onclick="resetGame()">Try Again</button>
+</div>
 
 <script>
-alert("JS IS RUNNING");
-document.body.innerHTML += "<p>JavaScript works</p>";
+let canvas, ctx;
+let player, hearts, spikes, goal, score;
+let gravity = 0.6;
+let keys = {};
+let gameRunning = true;
+
+function initCanvas() {
+    canvas = document.getElementById("game");
+    ctx = canvas.getContext("2d");
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
+function init() {
+    player = { x: 50, y: 300, dy: 0, onGround: false };
+
+    hearts = [
+        {x: 200, y: 300},
+        {x: 400, y: 250},
+        {x: 600, y: 300},
+        {x: 800, y: 200},
+        {x: 1000, y: 300}
+    ];
+
+    spikes = [
+        {x: 500, y: 330},
+        {x: 900, y: 330}
+    ];
+
+    goal = { x: 1200, y: 300 };
+
+    score = 0;
+    gameRunning = true;
+
+    document.getElementById("score").innerText = score;
+    document.getElementById("gameover").style.display = "none";
+    document.getElementById("message").style.display = "none";
+}
+
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
+
+function drawPlayer() {
+    ctx.font = "30px Arial";
+    ctx.fillText("👩", player.x, player.y);
+}
+
+function drawGround() {
+    ctx.fillStyle = "green";
+    ctx.fillRect(0, 350, canvas.width, 50);
+}
+
+function loop() {
+    if (!gameRunning) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawGround();
+
+    // movement
+    if (keys["ArrowRight"]) player.x += 5;
+    if (keys["ArrowLeft"]) player.x -= 5;
+
+    if (keys["ArrowUp"] && player.onGround) {
+        player.dy = -12;
+        player.onGround = false;
+    }
+
+    player.dy += gravity;
+    player.y += player.dy;
+
+    if (player.y >= 320) {
+        player.y = 320;
+        player.dy = 0;
+        player.onGround = true;
+    }
+
+    // hearts
+    hearts.forEach((h, i) => {
+        ctx.fillText("❤️", h.x, h.y);
+
+        if (Math.abs(player.x - h.x) < 20 && Math.abs(player.y - h.y) < 20) {
+            hearts.splice(i, 1);
+            score++;
+            document.getElementById("score").innerText = score;
+        }
+    });
+
+    // spikes
+    spikes.forEach(s => {
+        ctx.fillText("💀", s.x, s.y);
+
+        if (Math.abs(player.x - s.x) < 20 && Math.abs(player.y - s.y) < 20) {
+            gameRunning = false;
+            document.getElementById("gameover").style.display = "block";
+        }
+    });
+
+    ctx.fillText("🎁", goal.x, goal.y);
+
+    if (player.x > goal.x && score >= 5) {
+        gameRunning = false;
+        document.getElementById("message").style.display = "block";
+    }
+
+    drawPlayer();
+    requestAnimationFrame(loop);
+}
+
+function resetGame() {
+    init();
+    loop();
+}
+
+window.onload = function () {
+    initCanvas();   // 🔥 IMPORTANT FIX
+    init();
+    loop();
+};
 </script>
 
 </body>
