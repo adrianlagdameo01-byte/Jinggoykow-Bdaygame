@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>For Jinggoykow 💖</title>
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+    background: linear-gradient(#87CEEB, #fff);
+    font-family: Arial;
+}
+
+canvas {
+    display: block;
+}
+
+#ui {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: black;
+    font-size: 18px;
+}
+
+#message {
+    display: none;
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    max-width: 600px;
+    text-align: center;
+}
+
+button {
+    position: fixed;
+    bottom: 20px;
+    padding: 15px;
+    font-size: 20px;
+}
+#left { left: 20px; }
+#right { left: 100px; }
+#jump { right: 20px; }
+</style>
+</head>
+
+<body>
+
+<div id="ui">Hearts: <span id="score">0</span> / 5</div>
+
+<canvas id="game"></canvas>
+
+<div id="message">
+<h2>🎉 You unlocked the message 💖</h2>
+<p>
+✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎉🎂✨✨✨<br><br>
+
+Tanda mo naaaaaa! Char lang 🤭<br><br>
+
+But seriously, I really wish I could spend this whole day with you...<br><br>
+
+(👉 Paste your FULL message here 💖)
+</p>
+</div>
+
+<button id="left">⬅️</button>
+<button id="right">➡️</button>
+<button id="jump">⬆️</button>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let player = { x: 50, y: 300, w: 30, h: 30, dy: 0, onGround: false };
+let gravity = 0.6;
+let score = 0;
+
+let keys = {};
+
+let hearts = [
+    {x: 200, y: 300},
+    {x: 400, y: 250},
+    {x: 600, y: 300},
+    {x: 800, y: 200},
+    {x: 1000, y: 300}
+];
+
+let spikes = [
+    {x: 500, y: 330},
+    {x: 900, y: 330}
+];
+
+let goal = { x: 1200, y: 300 };
+
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
+
+document.getElementById("left").onclick = () => keys["ArrowLeft"] = true;
+document.getElementById("right").onclick = () => keys["ArrowRight"] = true;
+document.getElementById("jump").onclick = () => keys["ArrowUp"] = true;
+
+function drawPlayer() {
+    ctx.fillStyle = "red";
+    ctx.fillRect(player.x, player.y, player.w, player.h);
+}
+
+function drawGround() {
+    ctx.fillStyle = "green";
+    ctx.fillRect(0, 350, canvas.width, 50);
+}
+
+function update() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawGround();
+
+    // Movement
+    if (keys["ArrowRight"]) player.x += 5;
+    if (keys["ArrowLeft"]) player.x -= 5;
+
+    if (keys["ArrowUp"] && player.onGround) {
+        player.dy = -12;
+        player.onGround = false;
+    }
+
+    player.dy += gravity;
+    player.y += player.dy;
+
+    if (player.y >= 320) {
+        player.y = 320;
+        player.dy = 0;
+        player.onGround = true;
+    }
+
+    // Draw hearts
+    hearts.forEach((h, i) => {
+        ctx.fillText("❤️", h.x, h.y);
+        if (Math.abs(player.x - h.x) < 20 && Math.abs(player.y - h.y) < 20) {
+            hearts.splice(i, 1);
+            score++;
+            document.getElementById("score").innerText = score;
+        }
+    });
+
+    // Draw spikes
+    spikes.forEach(s => {
+        ctx.fillText("💀", s.x, s.y);
+        if (Math.abs(player.x - s.x) < 20 && Math.abs(player.y - s.y) < 20) {
+            alert("Ouch! Try again 😅");
+            location.reload();
+        }
+    });
+
+    // Draw goal
+    ctx.fillText("🎁", goal.x, goal.y);
+
+    if (player.x > goal.x && score >= 5) {
+        document.getElementById("message").style.display = "block";
+    }
+
+    drawPlayer();
+
+    requestAnimationFrame(update);
+}
+
+update();
+</script>
+
+</body>
+</html>
