@@ -64,22 +64,12 @@ Aside from good health and more blessings sa work, I’m always praying for your
 
 I know lately hindi tayo masyadong nagkakausap, and I take responsibility for that. I get overwhelmed by our situation, and minsan kinakain ako ng negative thoughts—especially ngayon na wala pa ring response si Titaz. I tried to distract myself with work, pero nasobrahan na… to the point na napapabayaan ko na pati church and ikaw. And I truly regret that.
 
-You have no idea how much I want things to be okay for us. Pero alam ko rin na kailangan natin pagdaanan at tiisin ‘to—for our future.
-
-I keep praying that one day, we’ll look back and say we did everything we could to fight for our love.
-
-For now, I understand na wala ka pang magagawa… and ako naman, all I can do is wait.
+You have no idea how much I want things to be okay for us.
 
 But one thing’s for sure—hihintayin kita.
 Kasi mahal na mahal kita, Jinggoykow. ❤️
 
-Enjoy your birthday, okay? Don’t stress too much sa work—napapansin ko na lumalaki na eyebags mo 😅 And please don’t skip meals or cut too much rice. Kumain ka nang maayos. Kahit pa lumobo ka ng x5, ikaw pa rin ang pinakamaganda at pinaka-sexy para sa’kin 🫠
-
-I’m always here for you, no matter what.
-
 —Maximow 🥰
-
-
 </p>
 </div>
 
@@ -95,6 +85,10 @@ let gravity = 0.6;
 let keys = {};
 let gameRunning = true;
 
+/* ☁️ CLOUDS */
+let clouds = [];
+
+/* INIT CANVAS */
 function initCanvas() {
     canvas = document.getElementById("game");
     ctx = canvas.getContext("2d");
@@ -127,11 +121,38 @@ function init() {
     document.getElementById("score").innerText = score;
     document.getElementById("gameover").style.display = "none";
     document.getElementById("message").style.display = "none";
+
+    /* ☁️ CLOUD INIT */
+    clouds = [
+        {x:100,y:60},
+        {x:300,y:100},
+        {x:600,y:70},
+        {x:900,y:120},
+        {x:1200,y:80}
+    ];
 }
 
+/* INPUT */
 document.addEventListener("keydown", e => keys[e.key] = true);
 document.addEventListener("keyup", e => keys[e.key] = false);
 
+/* ☁️ DRAW CLOUDS */
+function drawClouds() {
+    ctx.font = "28px Arial";
+
+    for (let c of clouds) {
+        ctx.fillText("☁️", c.x, c.y);
+
+        c.x -= 0.2;
+
+        if (c.x < -50) {
+            c.x = canvas.width + 50;
+            c.y = 50 + Math.random() * 120;
+        }
+    }
+}
+
+/* PLAYER */
 function drawPlayer() {
     ctx.font = "30px Arial";
     ctx.fillText("👩", player.x, player.y);
@@ -142,14 +163,15 @@ function drawGround() {
     ctx.fillRect(0, 350, canvas.width, 50);
 }
 
+/* LOOP */
 function loop() {
     if (!gameRunning) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    drawClouds(); // ☁️ ADDED HERE
     drawGround();
 
-    // movement
     if (keys["ArrowRight"]) player.x += 5;
     if (keys["ArrowLeft"]) player.x -= 5;
 
@@ -167,7 +189,7 @@ function loop() {
         player.onGround = true;
     }
 
-    // hearts
+    /* HEARTS */
     hearts.forEach((h, i) => {
         ctx.fillText("❤️", h.x, h.y);
 
@@ -178,7 +200,7 @@ function loop() {
         }
     });
 
-    // spikes
+    /* SPIKES */
     spikes.forEach(s => {
         ctx.fillText("💀", s.x, s.y);
 
@@ -199,13 +221,15 @@ function loop() {
     requestAnimationFrame(loop);
 }
 
+/* RESET */
 function resetGame() {
     init();
     loop();
 }
 
+/* START */
 window.onload = function () {
-    initCanvas();   // 🔥 IMPORTANT FIX
+    initCanvas();
     init();
     loop();
 };
