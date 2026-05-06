@@ -1,99 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>For Jinggoykow 💖</title>
-
-<style>
-body {
-    margin: 0;
-    overflow: hidden;
-    font-family: Arial;
-    background: linear-gradient(#87CEEB, #fff);
-}
-
-canvas {
-    display: block;
-}
-
-#ui {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 18px;
-    z-index: 5;
-}
-
-.screen {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: rgba(255,255,255,0.95);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    z-index: 20;
-    padding: 20px;
-}
-
-button {
-    padding: 12px 25px;
-    font-size: 18px;
-    margin-top: 15px;
-    border-radius: 10px;
-    border: none;
-    background: hotpink;
-    color: white;
-    cursor: pointer;
-}
-
-#dialogue {
-    position: absolute;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: white;
-    padding: 15px;
-    border-radius: 12px;
-    max-width: 500px;
-    display: none;
-    z-index: 10;
-}
-</style>
-</head>
-
-<body>
-
-<!-- INTRO -->
-<div id="intro" class="screen">
-    <h1>💖 A Game Made Just for You 💖</h1>
-    <p>Press start to begin your journey 🎮✨</p>
-    <button onclick="startGame()">Start 💕</button>
-</div>
-
-<!-- UI -->
-<div id="ui">Hearts: <span id="score">0</span> / 5</div>
-
-<canvas id="game"></canvas>
-
-<div id="dialogue"></div>
-
-<!-- WIN SCREEN -->
-<div id="message" class="screen" style="display:none;">
-    <h2>🎉 You unlocked your message 💖</h2>
-    <p style="max-width:600px; line-height:1.6;">
-        <span id="typed"></span>
-    </p>
-</div>
-
-<!-- GAME OVER -->
-<div id="gameover" class="screen" style="display:none;">
-    <h2>💀 Try Again 😅</h2>
-    <button onclick="resetGame()">Retry</button>
-</div>
-
 <script>
 let canvas, ctx;
 let player, hearts, spikes, goal, score;
@@ -101,24 +5,15 @@ let gravity = 0.6;
 let keys = {};
 let gameRunning = false;
 
-/* FULL MESSAGE */
-const finalMessage = `
-✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎉🎂🎈🎊🎁🍾🪅🪩 ✨✨✨
+const finalMessage = `✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎉🎂✨✨✨
 
-Tanda mo naaaaaa! Char lang 🤭 But seriously, I really wish I could spend this whole day with you, especially ngayon na birthday mo.
+Tanda mo naaaaaa! Char lang 🤭
 
-Aside from good health and more blessings sa work, I’m always praying for your safety and genuine happiness. May God continue to give you wisdom as you lead His church and ministry. I also believe that in His perfect time, makikilala rin Siya nila Tito at ng mga kapatid mo. And I’m really hoping matuloy na yung Shopee business mo—kaya mo ‘yan. Lakasan mo lang loob mo, stay wise, and keep praying. Lagi kitang isasama sa prayers ko, and I’ll always support you, okay?
+But seriously, I really wish I could spend this day with you...
 
-I know lately hindi tayo masyadong nagkakausap, and I take responsibility for that. I get overwhelmed by our situation, and minsan kinakain ako ng negative thoughts—especially ngayon na wala pa ring response si Titaz. I tried to distract myself with work, pero nasobrahan na… to the point na napapabayaan ko na pati church and ikaw. And I truly regret that.
+Mahal na mahal kita ❤️
 
-You have no idea how much I want things to be okay for us.
-
-But one thing’s for sure—hihintayin kita.
-
-Kasi mahal na mahal kita, Jinggoykow. ❤️
-
-—Maximow 🥰
-`;
+—Maximow 🥰`;
 
 /* INIT */
 function initCanvas(){
@@ -129,102 +24,112 @@ function initCanvas(){
 }
 
 function init(){
-    player = { x: 50, y: 300, dy: 0, onGround: false };
+    player = {x:50,y:300,dy:0,onGround:false};
 
     hearts = [
         {x:200,y:300},
-        {x:400,y:250},
-        {x:600,y:300},
-        {x:800,y:200},
-        {x:1000,y:300}
+        {x:500,y:250},
+        {x:800,y:300},
+        {x:1000,y:200},
+        {x:1200,y:300}
     ];
 
     spikes = [
-        {x:500,y:330},
+        {x:600,y:330},
         {x:900,y:330}
     ];
 
-    goal = {x:1200,y:300};
+    goal = {x:1400,y:300};
 
     score = 0;
     document.getElementById("score").innerText = score;
 
-    document.getElementById("gameover").style.display = "none";
-    document.getElementById("message").style.display = "none";
+    document.getElementById("gameover").style.display="none";
+    document.getElementById("message").style.display="none";
 }
 
-document.addEventListener("keydown", e => keys[e.key] = true);
-document.addEventListener("keyup", e => keys[e.key] = false);
+document.addEventListener("keydown",e=>keys[e.key]=true);
+document.addEventListener("keyup",e=>keys[e.key]=false);
 
 /* DRAW */
 function drawPlayer(){
-    ctx.font = "30px Arial";
-    ctx.fillText("👩", player.x, player.y);
+    ctx.font="28px Arial";
+    ctx.fillText("👩",player.x,player.y);
 }
 
 function ground(){
-    ctx.fillStyle = "green";
+    ctx.fillStyle="green";
     ctx.fillRect(0,350,canvas.width,50);
 }
 
-/* TYPE EFFECT */
-function typeText(text, i=0){
-    if(i < text.length){
-        document.getElementById("typed").innerHTML += text[i];
-        setTimeout(()=>typeText(text,i+1), 20);
-    }
+/* TYPE TEXT (OPTIMIZED) */
+function typeText(text){
+    let i=0;
+    let el=document.getElementById("typed");
+    el.innerHTML="";
+
+    let interval=setInterval(()=>{
+        el.innerHTML += text[i];
+        i++;
+        if(i>=text.length) clearInterval(interval);
+    },15);
 }
 
-/* GAME LOOP */
+/* GAME LOOP (OPTIMIZED) */
 function loop(){
     if(!gameRunning) return;
 
     ctx.clearRect(0,0,canvas.width,canvas.height);
+
     ground();
 
-    if(keys["ArrowRight"]) player.x += 5;
-    if(keys["ArrowLeft"]) player.x -= 5;
+    // movement
+    if(keys["ArrowRight"]) player.x+=5;
+    if(keys["ArrowLeft"]) player.x-=5;
 
     if(keys["ArrowUp"] && player.onGround){
-        player.dy = -12;
-        player.onGround = false;
+        player.dy=-11;
+        player.onGround=false;
     }
 
-    player.dy += gravity;
-    player.y += player.dy;
+    player.dy+=gravity;
+    player.y+=player.dy;
 
-    if(player.y >= 320){
-        player.y = 320;
-        player.dy = 0;
-        player.onGround = true;
+    if(player.y>=320){
+        player.y=320;
+        player.dy=0;
+        player.onGround=true;
     }
 
-    hearts.forEach((h,i)=>{
+    // hearts
+    for(let i=0;i<hearts.length;i++){
+        let h=hearts[i];
         ctx.fillText("❤️",h.x,h.y);
 
-        if(Math.abs(player.x - h.x) < 20 && Math.abs(player.y - h.y) < 20){
+        if(Math.abs(player.x-h.x)<20 && Math.abs(player.y-h.y)<20){
             hearts.splice(i,1);
             score++;
-            document.getElementById("score").innerText = score;
+            document.getElementById("score").innerText=score;
+            i--;
         }
-    });
+    }
 
-    spikes.forEach(s=>{
+    // spikes
+    for(let s of spikes){
         ctx.fillText("💀",s.x,s.y);
 
-        if(Math.abs(player.x - s.x) < 20 && Math.abs(player.y - s.y) < 20){
-            gameRunning = false;
-            document.getElementById("gameover").style.display = "flex";
+        if(Math.abs(player.x-s.x)<20 && Math.abs(player.y-s.y)<20){
+            gameRunning=false;
+            document.getElementById("gameover").style.display="flex";
         }
-    });
+    }
 
     ctx.fillText("🎁",goal.x,goal.y);
 
-    /* ✅ FIXED WIN CONDITION */
-    if(score >= 5){
-        gameRunning = false;
-        document.getElementById("message").style.display = "flex";
-        document.getElementById("typed").innerHTML = "";
+    // WIN (FIXED + SIMPLE)
+    if(score>=5){
+        gameRunning=false;
+        document.getElementById("message").style.display="flex";
         typeText(finalMessage);
     }
 
@@ -234,24 +139,21 @@ function loop(){
 
 /* START */
 function startGame(){
-    document.getElementById("intro").style.display = "none";
+    document.getElementById("intro").style.display="none";
     init();
-    gameRunning = true;
+    gameRunning=true;
     loop();
 }
 
-/* RESTART */
+/* RESET */
 function resetGame(){
     init();
-    gameRunning = true;
+    gameRunning=true;
     loop();
 }
 
 /* INIT */
-window.onload = function(){
+window.onload=function(){
     initCanvas();
 };
 </script>
-
-</body>
-</html>
