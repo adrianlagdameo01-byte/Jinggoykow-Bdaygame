@@ -9,13 +9,11 @@ body {
     margin: 0;
     overflow: hidden;
     font-family: Arial;
+    transition: background 2s;
     background: linear-gradient(#87CEEB, #ffffff);
 }
 
-/* canvas */
-canvas {
-    display: block;
-}
+canvas { display:block; }
 
 /* UI */
 #ui {
@@ -23,9 +21,10 @@ canvas {
     top: 10px;
     left: 10px;
     z-index: 5;
+    font-size: 18px;
 }
 
-/* screens */
+/* SCENES */
 .screen {
     position: absolute;
     width: 100%;
@@ -44,73 +43,72 @@ button {
     padding: 12px 25px;
     font-size: 18px;
     margin-top: 15px;
-    cursor: pointer;
     border-radius: 10px;
     border: none;
     background: hotpink;
     color: white;
 }
 
-/* joystick */
-#controls {
+/* dialogue box */
+#dialogue {
     position: absolute;
-    bottom: 30px;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 40px;
-    z-index: 10;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    max-width: 600px;
+    z-index: 15;
+    display: none;
 }
 
-.ctrl {
-    font-size: 30px;
-    background: rgba(0,0,0,0.2);
-    padding: 15px;
-    border-radius: 50%;
-    user-select: none;
+/* fade effect */
+.fade {
+    animation: fadeIn 2s;
+}
+
+@keyframes fadeIn {
+    from {opacity:0;}
+    to {opacity:1;}
 }
 </style>
 </head>
 
 <body>
 
+<!-- INTRO -->
 <div id="intro" class="screen">
-    <h1>💖 A Game for Jinggoykow 💖</h1>
-    <p>
-        Once upon a time...<br>
-        someone built a small world just for you 🎮✨
-    </p>
-    <button onclick="startGame()">Press Start 💕</button>
+    <h1>💖 A Game Made Just for You 💖</h1>
+    <p>A small world… built with love 🎮✨</p>
+    <button onclick="startGame()">Start Journey 💕</button>
 </div>
 
-<div id="ui">Hearts: <span id="score">0</span> / 5</div>
+<!-- UI -->
+<div id="ui">Hearts: <span id="score">0</span>/5</div>
 
 <canvas id="game"></canvas>
 
+<!-- DIALOGUE -->
+<div id="dialogue"></div>
+
+<!-- MESSAGE -->
 <div id="message" class="screen" style="display:none;">
-<h2>🎉 You unlocked your message 💖</h2>
-<p style="max-width:600px; line-height:1.5;">
-✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎉🎂🎈🎊🎁🍾🪅🪩 ✨✨✨<br><br>
-
-(Paste your full message here 💖)
-</p>
+    <h2>🎉 You finished the journey 💖</h2>
+    <p style="max-width:600px;">
+        <span id="typed"></span>
+    </p>
 </div>
 
+<!-- GAME OVER -->
 <div id="gameover" class="screen" style="display:none;">
-<h2>💀 Oops! Try Again 😅</h2>
-<button onclick="resetGame()">Try Again</button>
+    <h2>💀 Try Again 😅</h2>
+    <button onclick="resetGame()">Retry</button>
 </div>
 
-<!-- mobile controls -->
-<div id="controls">
-    <div class="ctrl" onmousedown="keys['ArrowLeft']=true" onmouseup="keys['ArrowLeft']=false">⬅️</div>
-    <div class="ctrl" onmousedown="keys['ArrowRight']=true" onmouseup="keys['ArrowRight']=false">➡️</div>
-    <div class="ctrl" onmousedown="jump()">⬆️</div>
-</div>
-
-<!-- music -->
+<!-- MUSIC -->
 <audio id="bgm" loop>
-    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a3f7d7.mp3?filename=romantic-112191.mp3" type="audio/mp3">
+<source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a3f7d7.mp3" type="audio/mp3">
 </audio>
 
 <script>
@@ -119,7 +117,36 @@ let player, hearts, spikes, goal, score;
 let gravity = 0.6;
 let keys = {};
 let gameRunning = false;
+let time = 0;
 
+/* STORY */
+const story = [
+"Once upon a time...",
+"A girl entered a small world made just for her 💖",
+"She didn’t know… someone was cheering for her all along.",
+"Collect the hearts… and reach the gift 🎁"
+];
+
+/* FULL MESSAGE */
+const finalMessage = `
+✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎉🎂🎈🎊🎁🍾🪅🪩 ✨✨✨
+
+Tanda mo naaaaaa! Char lang 🤭 But seriously, I really wish I could spend this whole day with you...
+
+Aside from good health and blessings, I’m always praying for your safety and happiness...
+
+I know things haven’t been easy lately… but I believe in us and in God’s timing.
+
+For now, I’ll wait.
+
+But one thing’s sure—hihintayin kita.
+
+Mahal na mahal kita. ❤️
+
+—Maximow 🥰
+`;
+
+/* INIT */
 function initCanvas(){
     canvas = document.getElementById("game");
     ctx = canvas.getContext("2d");
@@ -138,33 +165,24 @@ function init(){
         {x:1000,y:300}
     ];
 
-    spikes = [
-        {x:500,y:330},
-        {x:900,y:330}
-    ];
-
+    spikes = [{x:500,y:330},{x:900,y:330}];
     goal = {x:1200,y:300};
 
     score = 0;
     document.getElementById("score").innerText = score;
 
-    document.getElementById("gameover").style.display = "none";
-    document.getElementById("message").style.display = "none";
+    document.getElementById("gameover").style.display="none";
+    document.getElementById("message").style.display="none";
 }
 
-document.addEventListener("keydown", e => keys[e.key]=true);
-document.addEventListener("keyup", e => keys[e.key]=false);
+/* INPUT */
+document.addEventListener("keydown",e=>keys[e.key]=true);
+document.addEventListener("keyup",e=>keys[e.key]=false);
 
-function jump(){
-    if(player.onGround){
-        player.dy = -12;
-        player.onGround = false;
-    }
-}
-
-function draw(){
-    ctx.font = "30px Arial";
-    ctx.fillText("👩", player.x, player.y);
+/* DRAW */
+function drawPlayer(){
+    ctx.font="30px Arial";
+    ctx.fillText("👩‍🦰",player.x,player.y);
 }
 
 function ground(){
@@ -172,19 +190,40 @@ function ground(){
     ctx.fillRect(0,350,canvas.width,50);
 }
 
+/* DIALOGUE */
+let storyIndex=0;
+function showDialogue(text){
+    let d=document.getElementById("dialogue");
+    d.style.display="block";
+    d.innerText=text;
+    setTimeout(()=>d.style.display="none",2500);
+}
+
+/* TYPE EFFECT */
+function typeText(text,i=0){
+    if(i<text.length){
+        document.getElementById("typed").innerHTML+=text[i];
+        setTimeout(()=>typeText(text,i+1),20);
+    }
+}
+
+/* GAME LOOP */
 function loop(){
     if(!gameRunning) return;
 
     ctx.clearRect(0,0,canvas.width,canvas.height);
     ground();
 
+    // movement
     if(keys["ArrowRight"]) player.x+=5;
     if(keys["ArrowLeft"]) player.x-=5;
+    if(keys["ArrowUp"] && player.onGround){
+        player.dy=-12;
+        player.onGround=false;
+    }
 
-    if(keys["ArrowUp"]) jump();
-
-    player.dy += gravity;
-    player.y += player.dy;
+    player.dy+=gravity;
+    player.y+=player.dy;
 
     if(player.y>=320){
         player.y=320;
@@ -192,18 +231,20 @@ function loop(){
         player.onGround=true;
     }
 
+    // hearts
     hearts.forEach((h,i)=>{
         ctx.fillText("❤️",h.x,h.y);
-        if(Math.abs(player.x-h.x)<20 && Math.abs(player.y-h.y)<20){
+        if(Math.abs(player.x-h.x)<20){
             hearts.splice(i,1);
             score++;
             document.getElementById("score").innerText=score;
         }
     });
 
+    // spikes
     spikes.forEach(s=>{
         ctx.fillText("💀",s.x,s.y);
-        if(Math.abs(player.x-s.x)<20 && Math.abs(player.y-s.y)<20){
+        if(Math.abs(player.x-s.x)<20){
             gameRunning=false;
             document.getElementById("gameover").style.display="flex";
         }
@@ -214,21 +255,29 @@ function loop(){
     if(player.x>goal.x && score>=5){
         gameRunning=false;
         document.getElementById("message").style.display="flex";
+        document.getElementById("typed").innerHTML="";
+        typeText(finalMessage);
     }
 
-    draw();
+    drawPlayer();
     requestAnimationFrame(loop);
 }
 
-/* START GAME */
+/* START */
 function startGame(){
     document.getElementById("intro").style.display="none";
     init();
     gameRunning=true;
     loop();
-
-    // music
     document.getElementById("bgm").play();
+
+    // story intro
+    let i=0;
+    let storyInterval=setInterval(()=>{
+        showDialogue(story[i]);
+        i++;
+        if(i>=story.length) clearInterval(storyInterval);
+    },2500);
 }
 
 /* RESET */
@@ -238,7 +287,7 @@ function resetGame(){
     loop();
 }
 
-/* init */
+/* INIT */
 window.onload=function(){
     initCanvas();
 };
