@@ -8,8 +8,8 @@
 body {
     margin: 0;
     overflow: hidden;
-    background: linear-gradient(#87CEEB, #ffffff);
     font-family: Arial;
+    background: linear-gradient(#87CEEB, #ffffff);
 }
 
 /* canvas */
@@ -22,270 +22,225 @@ canvas {
     position: absolute;
     top: 10px;
     left: 10px;
-    font-size: 18px;
     z-index: 5;
 }
 
-/* overlays */
-#message, #gameover {
-    display: none;
-    position: absolute;
-    top: 10%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: white;
-    padding: 20px;
-    border-radius: 15px;
-    max-width: 650px;
-    text-align: center;
-    max-height: 70vh;
-    overflow-y: auto;
-    z-index: 10;
-    box-shadow: 0 0 30px rgba(255, 105, 180, 0.4);
-}
-
-/* floating hearts background */
-.heart-float {
-    position: absolute;
-    color: pink;
-    font-size: 20px;
-    animation: floatUp linear infinite;
-    opacity: 0.7;
-    z-index: 1;
-}
-
-@keyframes floatUp {
-    from { transform: translateY(100vh); }
-    to { transform: translateY(-10vh); }
-}
-
-/* win flash */
-#flash {
+/* screens */
+.screen {
     position: absolute;
     width: 100%;
     height: 100%;
-    background: white;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 9;
+    background: rgba(255,255,255,0.95);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    text-align: center;
+    padding: 20px;
 }
 
-/* buttons */
 button {
-    padding: 10px 20px;
-    font-size: 16px;
-    margin-top: 10px;
+    padding: 12px 25px;
+    font-size: 18px;
+    margin-top: 15px;
+    cursor: pointer;
+    border-radius: 10px;
+    border: none;
+    background: hotpink;
+    color: white;
+}
+
+/* joystick */
+#controls {
+    position: absolute;
+    bottom: 30px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 40px;
+    z-index: 10;
+}
+
+.ctrl {
+    font-size: 30px;
+    background: rgba(0,0,0,0.2);
+    padding: 15px;
+    border-radius: 50%;
+    user-select: none;
 }
 </style>
 </head>
 
 <body>
 
-<div id="flash"></div>
+<div id="intro" class="screen">
+    <h1>💖 A Game for Jinggoykow 💖</h1>
+    <p>
+        Once upon a time...<br>
+        someone built a small world just for you 🎮✨
+    </p>
+    <button onclick="startGame()">Press Start 💕</button>
+</div>
 
 <div id="ui">Hearts: <span id="score">0</span> / 5</div>
 
 <canvas id="game"></canvas>
 
-<div id="message">
-<h2>🎉 You unlocked your surprise 💖</h2>
-<p>
-✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎉🎂🎈🎊🎁🍾🪅🪩 ✨✨✨
+<div id="message" class="screen" style="display:none;">
+<h2>🎉 You unlocked your message 💖</h2>
+<p style="max-width:600px; line-height:1.5;">
+✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎉🎂🎈🎊🎁🍾🪅🪩 ✨✨✨<br><br>
 
-Tanda mo naaaaaa! Char lang 🤭 But seriously, I really wish I could spend this whole day with you, especially ngayon na birthday mo.
-
-Aside from good health and more blessings sa work, I’m always praying for your safety and genuine happiness. May God continue to give you wisdom as you lead His church and ministry. I also believe that in His perfect time, makikilala rin Siya nila Tito at ng mga kapatid mo. And I’m really hoping matuloy na yung Shopee business mo—kaya mo ‘yan. Lakasan mo lang loob mo, stay wise, and keep praying. Lagi kitang isasama sa prayers ko, and I’ll always support you, okay?
-
-I know lately hindi tayo masyadong nagkakausap, and I take responsibility for that. I get overwhelmed by our situation, and minsan kinakain ako ng negative thoughts—especially ngayon na wala pa ring response si Titaz. I tried to distract myself with work, pero nasobrahan na… to the point na napapabayaan ko na pati church and ikaw. And I truly regret that.
-
-You have no idea how much I want things to be okay for us. Pero alam ko rin na kailangan natin pagdaanan at tiisin ‘to—for our future.
-
-I keep praying that one day, we’ll look back and say we did everything we could to fight for our love.
-
-For now, I understand na wala ka pang magagawa… and ako naman, all I can do is wait.
-
-But one thing’s for sure—hihintayin kita.
-Kasi mahal na mahal kita, Jinggoykow. ❤️
-
-Enjoy your birthday, okay? Don’t stress too much sa work—napapansin ko na lumalaki na eyebags mo 😅 And please don’t skip meals or cut too much rice. Kumain ka nang maayos. Kahit pa lumobo ka ng x5, ikaw pa rin ang pinakamaganda at pinaka-sexy para sa’kin 🫠
-
-I’m always here for you, no matter what.
-
-—Maximow 🥰
-
-
+(Paste your full message here 💖)
 </p>
 </div>
 
-<div id="gameover">
-<h2>💀 Ouch! Try Again 😅</h2>
+<div id="gameover" class="screen" style="display:none;">
+<h2>💀 Oops! Try Again 😅</h2>
 <button onclick="resetGame()">Try Again</button>
 </div>
+
+<!-- mobile controls -->
+<div id="controls">
+    <div class="ctrl" onmousedown="keys['ArrowLeft']=true" onmouseup="keys['ArrowLeft']=false">⬅️</div>
+    <div class="ctrl" onmousedown="keys['ArrowRight']=true" onmouseup="keys['ArrowRight']=false">➡️</div>
+    <div class="ctrl" onmousedown="jump()">⬆️</div>
+</div>
+
+<!-- music -->
+<audio id="bgm" loop>
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a3f7d7.mp3?filename=romantic-112191.mp3" type="audio/mp3">
+</audio>
 
 <script>
 let canvas, ctx;
 let player, hearts, spikes, goal, score;
 let gravity = 0.6;
 let keys = {};
-let gameRunning = true;
+let gameRunning = false;
 
-/* INIT CANVAS */
-function initCanvas() {
+function initCanvas(){
     canvas = document.getElementById("game");
     ctx = canvas.getContext("2d");
-
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 }
 
-/* GAME INIT */
-function init() {
-    player = { x: 50, y: 300, dy: 0, onGround: false };
+function init(){
+    player = {x:50,y:300,dy:0,onGround:false};
 
     hearts = [
-        {x: 200, y: 300},
-        {x: 400, y: 250},
-        {x: 600, y: 300},
-        {x: 800, y: 200},
-        {x: 1000, y: 300}
+        {x:200,y:300},
+        {x:400,y:250},
+        {x:600,y:300},
+        {x:800,y:200},
+        {x:1000,y:300}
     ];
 
     spikes = [
-        {x: 500, y: 330},
-        {x: 900, y: 330}
+        {x:500,y:330},
+        {x:900,y:330}
     ];
 
-    goal = { x: 1200, y: 300 };
+    goal = {x:1200,y:300};
 
     score = 0;
-    gameRunning = true;
-
     document.getElementById("score").innerText = score;
+
     document.getElementById("gameover").style.display = "none";
     document.getElementById("message").style.display = "none";
 }
 
-/* CONTROLS */
-document.addEventListener("keydown", e => keys[e.key] = true);
-document.addEventListener("keyup", e => keys[e.key] = false);
+document.addEventListener("keydown", e => keys[e.key]=true);
+document.addEventListener("keyup", e => keys[e.key]=false);
 
-/* PLAYER */
-function drawPlayer() {
+function jump(){
+    if(player.onGround){
+        player.dy = -12;
+        player.onGround = false;
+    }
+}
+
+function draw(){
     ctx.font = "30px Arial";
     ctx.fillText("👩", player.x, player.y);
 }
 
-/* GROUND */
-function drawGround() {
-    ctx.fillStyle = "green";
-    ctx.fillRect(0, 350, canvas.width, 50);
+function ground(){
+    ctx.fillStyle="green";
+    ctx.fillRect(0,350,canvas.width,50);
 }
 
-/* HEART BURST EFFECT */
-function burst(x, y) {
-    for (let i = 0; i < 6; i++) {
-        ctx.fillText("💖", x + Math.random()*20, y + Math.random()*20);
-    }
-}
+function loop(){
+    if(!gameRunning) return;
 
-/* WIN FLASH */
-function flashScreen() {
-    let flash = document.getElementById("flash");
-    flash.style.transition = "0.5s";
-    flash.style.opacity = 0.7;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ground();
 
-    setTimeout(() => {
-        flash.style.opacity = 0;
-    }, 500);
-}
+    if(keys["ArrowRight"]) player.x+=5;
+    if(keys["ArrowLeft"]) player.x-=5;
 
-/* LOOP */
-function loop() {
-    if (!gameRunning) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    drawGround();
-
-    // movement
-    if (keys["ArrowRight"]) player.x += 5;
-    if (keys["ArrowLeft"]) player.x -= 5;
-
-    if (keys["ArrowUp"] && player.onGround) {
-        player.dy = -12;
-        player.onGround = false;
-    }
+    if(keys["ArrowUp"]) jump();
 
     player.dy += gravity;
     player.y += player.dy;
 
-    if (player.y >= 320) {
-        player.y = 320;
-        player.dy = 0;
-        player.onGround = true;
+    if(player.y>=320){
+        player.y=320;
+        player.dy=0;
+        player.onGround=true;
     }
 
-    // hearts
-    hearts.forEach((h, i) => {
-        ctx.fillText("❤️", h.x, h.y);
-
-        if (Math.abs(player.x - h.x) < 20 && Math.abs(player.y - h.y) < 20) {
-            burst(h.x, h.y); // ✨ effect
-            hearts.splice(i, 1);
+    hearts.forEach((h,i)=>{
+        ctx.fillText("❤️",h.x,h.y);
+        if(Math.abs(player.x-h.x)<20 && Math.abs(player.y-h.y)<20){
+            hearts.splice(i,1);
             score++;
-            document.getElementById("score").innerText = score;
+            document.getElementById("score").innerText=score;
         }
     });
 
-    // spikes
-    spikes.forEach(s => {
-        ctx.fillText("💀", s.x, s.y);
-
-        if (Math.abs(player.x - s.x) < 20 && Math.abs(player.y - s.y) < 20) {
-            gameRunning = false;
-            document.getElementById("gameover").style.display = "block";
+    spikes.forEach(s=>{
+        ctx.fillText("💀",s.x,s.y);
+        if(Math.abs(player.x-s.x)<20 && Math.abs(player.y-s.y)<20){
+            gameRunning=false;
+            document.getElementById("gameover").style.display="flex";
         }
     });
 
-    ctx.fillText("🎁", goal.x, goal.y);
+    ctx.fillText("🎁",goal.x,goal.y);
 
-    // WIN
-    if (player.x > goal.x && score >= 5) {
-        gameRunning = false;
-        flashScreen();
-        document.getElementById("message").style.display = "block";
+    if(player.x>goal.x && score>=5){
+        gameRunning=false;
+        document.getElementById("message").style.display="flex";
     }
 
-    drawPlayer();
+    draw();
     requestAnimationFrame(loop);
 }
 
-/* RESTART */
-function resetGame() {
+/* START GAME */
+function startGame(){
+    document.getElementById("intro").style.display="none";
     init();
+    gameRunning=true;
+    loop();
+
+    // music
+    document.getElementById("bgm").play();
+}
+
+/* RESET */
+function resetGame(){
+    init();
+    gameRunning=true;
     loop();
 }
 
-/* FLOATING HEARTS BACKGROUND */
-function spawnHearts() {
-    setInterval(() => {
-        let h = document.createElement("div");
-        h.className = "heart-float";
-        h.innerText = "💗";
-        h.style.left = Math.random() * 100 + "vw";
-        h.style.animationDuration = (3 + Math.random() * 3) + "s";
-        document.body.appendChild(h);
-
-        setTimeout(() => h.remove(), 6000);
-    }, 400);
-}
-
-/* START */
-window.onload = function () {
+/* init */
+window.onload=function(){
     initCanvas();
-    init();
-    loop();
-    spawnHearts();
 };
 </script>
 
