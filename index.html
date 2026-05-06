@@ -1,57 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>For Jinggoykow 💖</title>
+
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+    background: linear-gradient(#87CEEB, #fff);
+    font-family: Arial;
+    touch-action: none;
+}
+
+canvas {
+    display: block;
+}
+
+/* UI */
+#ui {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 18px;
+    z-index: 5;
+}
+
+/* screens */
+.screen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.95);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 10;
+    text-align: center;
+}
+
+button {
+    padding: 12px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    background: hotpink;
+    color: white;
+}
+
+/* mobile controls */
+#controls {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    z-index: 20;
+}
+
+#jump {
+    padding: 15px 30px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
+    background: hotpink;
+    color: white;
+}
+</style>
+</head>
+
+<body>
+
+<div id="ui">❤️ <span id="score">0</span> / 5</div>
+
+<canvas id="game"></canvas>
+
+<div id="message" class="screen">
+    <h2>🎉 You unlocked your message 💖</h2>
+    <p style="max-width:600px;">
+        ✨ Happy Birthday Jinggoykow 🥳💖<br><br>
+        (Paste your message here)
+    </p>
+</div>
+
+<div id="gameover" class="screen">
+    <h2>💀 Try Again</h2>
+    <button onclick="resetGame()">Retry</button>
+</div>
+
+<!-- MOBILE CONTROL -->
+<div id="controls">
+    <button id="jump">⬆️ JUMP</button>
+</div>
+
 <script>
-window.onload = function () {
+let canvas, ctx;
+let player, hearts, spikes, goal;
+let score = 0;
+let gravity = 0.6;
+let keys = {};
+let gameRunning = true;
 
-    const canvas = document.getElementById("game");
-    const ctx = canvas.getContext("2d");
-
+/* INIT */
+function initCanvas(){
+    canvas = document.getElementById("game");
+    ctx = canvas.getContext("2d");
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+}
 
-    let x = 50;
-    let y = 320;
-    let dy = 0;
-    let onGround = true;
+function init(){
+    player = {x:50,y:320,dy:0,onGround:false};
 
-    const gravity = 0.6;
+    hearts = [
+        {x:200,y:300},
+        {x:400,y:250},
+        {x:600,y:300},
+        {x:800,y:200},
+        {x:1000,y:300}
+    ];
 
-    /* CONTROLS */
-    document.addEventListener("keydown", (e) => {
+    spikes = [
+        {x:500,y:330},
+        {x:900,y:330}
+    ];
 
-        if (e.key === "ArrowRight") x += 10;
-        if (e.key === "ArrowLeft") x -= 10;
+    goal = {x:1200,y:300};
 
-        // ✅ JUMP FIX
-        if ((e.key === "ArrowUp" || e.key === " " ) && onGround) {
-            dy = -12;
-            onGround = false;
-        }
-    });
+    score = 0;
+    gameRunning = true;
 
-    function loop() {
+    document.getElementById("score").innerText = score;
+    document.getElementById("message").style.display = "none";
+    document.getElementById("gameover").style.display = "none";
+}
 
-        ctx.clearRect(0,0,canvas.width,canvas.height);
+/* INPUT */
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
 
-        // ground
-        ctx.fillStyle = "green";
-        ctx.fillRect(0, 350, canvas.width, 50);
+/* MOBILE JUMP */
+document.getElementById("jump").addEventListener("touchstart", jump);
+document.getElementById("jump").addEventListener("mousedown", jump);
 
-        // physics
-        dy += gravity;
-        y += dy;
+function jump(){
+    if(player.onGround){
+        player.dy = -12;
+        player.onGround = false;
+    }
+}
 
-        if (y >= 320) {
-            y = 320;
-            dy = 0;
-            onGround = true;
-        }
+/* DRAW */
+function draw(){
+    ctx.font = "30px Arial";
+    ctx.fillText("👩", player.x, player.y);
+}
 
-        // player
-        ctx.font = "30px Arial";
-        ctx.fillText("👩", x, y);
+function ground(){
+    ctx.fillStyle = "green";
+    ctx.fillRect(0, 350, canvas.width, 50);
+}
 
-        requestAnimationFrame(loop);
+/* LOOP */
+function loop(){
+    if(!gameRunning) return;
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    ground();
+
+    if(keys["ArrowRight"]) player.x += 5;
+    if(keys["ArrowLeft"]) player.x -= 5;
+    if(keys["ArrowUp"]) jump();
+
+    player.dy += gravity;
+    player.y += player.dy;
+
+    if(player.y >= 320){
+        player.y = 320;
+        player.dy = 0;
+        player.onGround = true;
     }
 
+    /* hearts */
+    for(let i=0;i<hearts.length;i++){
+        let h = hearts[i];
+        ctx.fillText("❤️", h.x, h.y);
+
+        if(Math.abs(player.x - h.x) < 20){
+            hearts.splice(i,1);
+            score++;
+            document.getElementById("score").innerText = score;
+            i--;
+        }
+    }
+
+    /* spikes */
+    for(let s of spikes){
+        ctx.fillText("💀", s.x, s.y);
+
+        if(Math.abs(player.x - s.x) < 20){
+            gameRunning = false;
+            document.getElementById("gameover").style.display = "flex";
+        }
+    }
+
+    ctx.fillText("🎁", goal.x, goal.y);
+
+    /* WIN */
+    if(score >= 5){
+        gameRunning = false;
+        document.getElementById("message").style.display = "flex";
+    }
+
+    draw();
+    requestAnimationFrame(loop);
+}
+
+/* RESET */
+function resetGame(){
+    init();
+    loop();
+}
+
+/* START */
+window.onload = function(){
+    initCanvas();
+    init();
     loop();
 };
 </script>
+
+</body>
+</html>
