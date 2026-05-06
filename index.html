@@ -9,22 +9,21 @@ body {
     margin: 0;
     overflow: hidden;
     font-family: Arial;
-    transition: background 2s;
-    background: linear-gradient(#87CEEB, #ffffff);
+    background: linear-gradient(#87CEEB, #fff);
 }
 
-canvas { display:block; }
+canvas {
+    display: block;
+}
 
-/* UI */
 #ui {
     position: absolute;
     top: 10px;
     left: 10px;
-    z-index: 5;
     font-size: 18px;
+    z-index: 5;
 }
 
-/* SCENES */
 .screen {
     position: absolute;
     width: 100%;
@@ -34,8 +33,8 @@ canvas { display:block; }
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    z-index: 20;
     text-align: center;
+    z-index: 20;
     padding: 20px;
 }
 
@@ -47,9 +46,9 @@ button {
     border: none;
     background: hotpink;
     color: white;
+    cursor: pointer;
 }
 
-/* dialogue box */
 #dialogue {
     position: absolute;
     bottom: 80px;
@@ -58,19 +57,9 @@ button {
     background: white;
     padding: 15px;
     border-radius: 12px;
-    max-width: 600px;
-    z-index: 15;
+    max-width: 500px;
     display: none;
-}
-
-/* fade effect */
-.fade {
-    animation: fadeIn 2s;
-}
-
-@keyframes fadeIn {
-    from {opacity:0;}
-    to {opacity:1;}
+    z-index: 10;
 }
 </style>
 </head>
@@ -80,22 +69,21 @@ button {
 <!-- INTRO -->
 <div id="intro" class="screen">
     <h1>💖 A Game Made Just for You 💖</h1>
-    <p>A small world… built with love 🎮✨</p>
-    <button onclick="startGame()">Start Journey 💕</button>
+    <p>Press start to begin your journey 🎮✨</p>
+    <button onclick="startGame()">Start 💕</button>
 </div>
 
 <!-- UI -->
-<div id="ui">Hearts: <span id="score">0</span>/5</div>
+<div id="ui">Hearts: <span id="score">0</span> / 5</div>
 
 <canvas id="game"></canvas>
 
-<!-- DIALOGUE -->
 <div id="dialogue"></div>
 
-<!-- MESSAGE -->
+<!-- WIN SCREEN -->
 <div id="message" class="screen" style="display:none;">
-    <h2>🎉 You finished the journey 💖</h2>
-    <p style="max-width:600px;">
+    <h2>🎉 You unlocked your message 💖</h2>
+    <p style="max-width:600px; line-height:1.6;">
         <span id="typed"></span>
     </p>
 </div>
@@ -106,42 +94,28 @@ button {
     <button onclick="resetGame()">Retry</button>
 </div>
 
-<!-- MUSIC -->
-<audio id="bgm" loop>
-<source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a3f7d7.mp3" type="audio/mp3">
-</audio>
-
 <script>
 let canvas, ctx;
 let player, hearts, spikes, goal, score;
 let gravity = 0.6;
 let keys = {};
 let gameRunning = false;
-let time = 0;
-
-/* STORY */
-const story = [
-"Once upon a time...",
-"A girl entered a small world made just for her 💖",
-"She didn’t know… someone was cheering for her all along.",
-"Collect the hearts… and reach the gift 🎁"
-];
 
 /* FULL MESSAGE */
 const finalMessage = `
 ✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎉🎂🎈🎊🎁🍾🪅🪩 ✨✨✨
 
-Tanda mo naaaaaa! Char lang 🤭 But seriously, I really wish I could spend this whole day with you...
+Tanda mo naaaaaa! Char lang 🤭 But seriously, I really wish I could spend this whole day with you, especially ngayon na birthday mo.
 
-Aside from good health and blessings, I’m always praying for your safety and happiness...
+Aside from good health and more blessings sa work, I’m always praying for your safety and genuine happiness. May God continue to give you wisdom as you lead His church and ministry. I also believe that in His perfect time, makikilala rin Siya nila Tito at ng mga kapatid mo. And I’m really hoping matuloy na yung Shopee business mo—kaya mo ‘yan. Lakasan mo lang loob mo, stay wise, and keep praying. Lagi kitang isasama sa prayers ko, and I’ll always support you, okay?
 
-I know things haven’t been easy lately… but I believe in us and in God’s timing.
+I know lately hindi tayo masyadong nagkakausap, and I take responsibility for that. I get overwhelmed by our situation, and minsan kinakain ako ng negative thoughts—especially ngayon na wala pa ring response si Titaz. I tried to distract myself with work, pero nasobrahan na… to the point na napapabayaan ko na pati church and ikaw. And I truly regret that.
 
-For now, I’ll wait.
+You have no idea how much I want things to be okay for us.
 
-But one thing’s sure—hihintayin kita.
+But one thing’s for sure—hihintayin kita.
 
-Mahal na mahal kita. ❤️
+Kasi mahal na mahal kita, Jinggoykow. ❤️
 
 —Maximow 🥰
 `;
@@ -155,7 +129,7 @@ function initCanvas(){
 }
 
 function init(){
-    player = {x:50,y:300,dy:0,onGround:false};
+    player = { x: 50, y: 300, dy: 0, onGround: false };
 
     hearts = [
         {x:200,y:300},
@@ -165,45 +139,39 @@ function init(){
         {x:1000,y:300}
     ];
 
-    spikes = [{x:500,y:330},{x:900,y:330}];
+    spikes = [
+        {x:500,y:330},
+        {x:900,y:330}
+    ];
+
     goal = {x:1200,y:300};
 
     score = 0;
     document.getElementById("score").innerText = score;
 
-    document.getElementById("gameover").style.display="none";
-    document.getElementById("message").style.display="none";
+    document.getElementById("gameover").style.display = "none";
+    document.getElementById("message").style.display = "none";
 }
 
-/* INPUT */
-document.addEventListener("keydown",e=>keys[e.key]=true);
-document.addEventListener("keyup",e=>keys[e.key]=false);
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
 
 /* DRAW */
 function drawPlayer(){
-    ctx.font="30px Arial";
-    ctx.fillText("👩‍🦰",player.x,player.y);
+    ctx.font = "30px Arial";
+    ctx.fillText("👩", player.x, player.y);
 }
 
 function ground(){
-    ctx.fillStyle="green";
+    ctx.fillStyle = "green";
     ctx.fillRect(0,350,canvas.width,50);
 }
 
-/* DIALOGUE */
-let storyIndex=0;
-function showDialogue(text){
-    let d=document.getElementById("dialogue");
-    d.style.display="block";
-    d.innerText=text;
-    setTimeout(()=>d.style.display="none",2500);
-}
-
 /* TYPE EFFECT */
-function typeText(text,i=0){
-    if(i<text.length){
-        document.getElementById("typed").innerHTML+=text[i];
-        setTimeout(()=>typeText(text,i+1),20);
+function typeText(text, i=0){
+    if(i < text.length){
+        document.getElementById("typed").innerHTML += text[i];
+        setTimeout(()=>typeText(text,i+1), 20);
     }
 }
 
@@ -214,48 +182,49 @@ function loop(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
     ground();
 
-    // movement
-    if(keys["ArrowRight"]) player.x+=5;
-    if(keys["ArrowLeft"]) player.x-=5;
+    if(keys["ArrowRight"]) player.x += 5;
+    if(keys["ArrowLeft"]) player.x -= 5;
+
     if(keys["ArrowUp"] && player.onGround){
-        player.dy=-12;
-        player.onGround=false;
+        player.dy = -12;
+        player.onGround = false;
     }
 
-    player.dy+=gravity;
-    player.y+=player.dy;
+    player.dy += gravity;
+    player.y += player.dy;
 
-    if(player.y>=320){
-        player.y=320;
-        player.dy=0;
-        player.onGround=true;
+    if(player.y >= 320){
+        player.y = 320;
+        player.dy = 0;
+        player.onGround = true;
     }
 
-    // hearts
     hearts.forEach((h,i)=>{
         ctx.fillText("❤️",h.x,h.y);
-        if(Math.abs(player.x-h.x)<20){
+
+        if(Math.abs(player.x - h.x) < 20 && Math.abs(player.y - h.y) < 20){
             hearts.splice(i,1);
             score++;
-            document.getElementById("score").innerText=score;
+            document.getElementById("score").innerText = score;
         }
     });
 
-    // spikes
     spikes.forEach(s=>{
         ctx.fillText("💀",s.x,s.y);
-        if(Math.abs(player.x-s.x)<20){
-            gameRunning=false;
-            document.getElementById("gameover").style.display="flex";
+
+        if(Math.abs(player.x - s.x) < 20 && Math.abs(player.y - s.y) < 20){
+            gameRunning = false;
+            document.getElementById("gameover").style.display = "flex";
         }
     });
 
     ctx.fillText("🎁",goal.x,goal.y);
 
-    if(player.x>goal.x && score>=5){
-        gameRunning=false;
-        document.getElementById("message").style.display="flex";
-        document.getElementById("typed").innerHTML="";
+    /* ✅ FIXED WIN CONDITION */
+    if(score >= 5){
+        gameRunning = false;
+        document.getElementById("message").style.display = "flex";
+        document.getElementById("typed").innerHTML = "";
         typeText(finalMessage);
     }
 
@@ -265,30 +234,21 @@ function loop(){
 
 /* START */
 function startGame(){
-    document.getElementById("intro").style.display="none";
+    document.getElementById("intro").style.display = "none";
     init();
-    gameRunning=true;
+    gameRunning = true;
     loop();
-    document.getElementById("bgm").play();
-
-    // story intro
-    let i=0;
-    let storyInterval=setInterval(()=>{
-        showDialogue(story[i]);
-        i++;
-        if(i>=story.length) clearInterval(storyInterval);
-    },2500);
 }
 
-/* RESET */
+/* RESTART */
 function resetGame(){
     init();
-    gameRunning=true;
+    gameRunning = true;
     loop();
 }
 
 /* INIT */
-window.onload=function(){
+window.onload = function(){
     initCanvas();
 };
 </script>
