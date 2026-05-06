@@ -4,18 +4,23 @@ let player, hearts, spikes, goal, score;
 let gravity = 0.6;
 let keys = {};
 let gameRunning = false;
+let winTriggered = false;
 
-const finalMessage = `✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎉🎂✨✨✨
+const finalMessage = `
+✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎉🎂✨✨✨
 
 Tanda mo naaaaaa! Char lang 🤭
 
-But seriously, I really wish I could spend this day with you...
+But seriously, I really wish I could spend this whole day with you...
+
+I know things haven’t been easy, but I’m still here.
 
 Mahal na mahal kita ❤️
 
-—Maximow 🥰`;
+—Maximow 🥰
+`;
 
-/* INIT */
+/* INIT CANVAS */
 function initCanvas(){
     canvas = document.getElementById("game");
     ctx = canvas.getContext("2d");
@@ -23,59 +28,63 @@ function initCanvas(){
     canvas.height = window.innerHeight;
 }
 
+/* RESET GAME */
 function init(){
     player = {x:50,y:300,dy:0,onGround:false};
 
     hearts = [
         {x:200,y:300},
-        {x:500,y:250},
-        {x:800,y:300},
-        {x:1000,y:200},
-        {x:1200,y:300}
+        {x:400,y:250},
+        {x:600,y:300},
+        {x:800,y:200},
+        {x:1000,y:300}
     ];
 
     spikes = [
-        {x:600,y:330},
+        {x:500,y:330},
         {x:900,y:330}
     ];
 
-    goal = {x:1400,y:300};
+    goal = {x:1300,y:300};
 
     score = 0;
-    document.getElementById("score").innerText = score;
+    winTriggered = false;
 
-    document.getElementById("gameover").style.display="none";
-    document.getElementById("message").style.display="none";
+    document.getElementById("score").innerText = score;
+    document.getElementById("gameover").style.display = "none";
+    document.getElementById("message").style.display = "none";
 }
 
+/* CONTROLS */
 document.addEventListener("keydown",e=>keys[e.key]=true);
 document.addEventListener("keyup",e=>keys[e.key]=false);
 
-/* DRAW */
+/* DRAW PLAYER */
 function drawPlayer(){
-    ctx.font="28px Arial";
+    ctx.font="30px Arial";
     ctx.fillText("👩",player.x,player.y);
 }
 
+/* GROUND */
 function ground(){
     ctx.fillStyle="green";
     ctx.fillRect(0,350,canvas.width,50);
 }
 
-/* TYPE TEXT (OPTIMIZED) */
+/* TYPE EFFECT (SMOOTH) */
 function typeText(text){
-    let i=0;
-    let el=document.getElementById("typed");
-    el.innerHTML="";
+    let i = 0;
+    let el = document.getElementById("typed");
+    el.innerHTML = "";
 
-    let interval=setInterval(()=>{
+    let interval = setInterval(() => {
         el.innerHTML += text[i];
         i++;
-        if(i>=text.length) clearInterval(interval);
-    },15);
+        if (i >= text.length) clearInterval(interval);
+    }, 15);
 }
 
-/* GAME LOOP (OPTIMIZED) */
+/* GAME LOOP */
 function loop(){
     if(!gameRunning) return;
 
@@ -84,76 +93,85 @@ function loop(){
     ground();
 
     // movement
-    if(keys["ArrowRight"]) player.x+=5;
-    if(keys["ArrowLeft"]) player.x-=5;
+    if(keys["ArrowRight"]) player.x += 5;
+    if(keys["ArrowLeft"]) player.x -= 5;
 
     if(keys["ArrowUp"] && player.onGround){
-        player.dy=-11;
-        player.onGround=false;
+        player.dy = -11;
+        player.onGround = false;
     }
 
-    player.dy+=gravity;
-    player.y+=player.dy;
+    player.dy += gravity;
+    player.y += player.dy;
 
-    if(player.y>=320){
-        player.y=320;
-        player.dy=0;
-        player.onGround=true;
+    if(player.y >= 320){
+        player.y = 320;
+        player.dy = 0;
+        player.onGround = true;
     }
 
-    // hearts
+    /* HEARTS */
     for(let i=0;i<hearts.length;i++){
-        let h=hearts[i];
+        let h = hearts[i];
         ctx.fillText("❤️",h.x,h.y);
 
         if(Math.abs(player.x-h.x)<20 && Math.abs(player.y-h.y)<20){
             hearts.splice(i,1);
             score++;
-            document.getElementById("score").innerText=score;
+            document.getElementById("score").textContent = score;
             i--;
         }
     }
 
-    // spikes
+    /* SPIKES */
     for(let s of spikes){
         ctx.fillText("💀",s.x,s.y);
 
         if(Math.abs(player.x-s.x)<20 && Math.abs(player.y-s.y)<20){
-            gameRunning=false;
-            document.getElementById("gameover").style.display="flex";
+            gameRunning = false;
+            document.getElementById("gameover").style.display = "flex";
+            return;
         }
     }
 
+    /* GOAL */
     ctx.fillText("🎁",goal.x,goal.y);
 
-    // WIN (FIXED + SIMPLE)
-    if(score>=5){
-        gameRunning=false;
-        document.getElementById("message").style.display="flex";
-        typeText(finalMessage);
+    /* WIN CONDITION (NO LAG FIX) */
+    if(score >= 5 && !winTriggered){
+        winTriggered = true;
+        gameRunning = false;
+
+        // wait 1 frame → prevents freeze spike
+        requestAnimationFrame(() => {
+            document.getElementById("message").style.display = "flex";
+            typeText(finalMessage);
+        });
+
+        return;
     }
 
     drawPlayer();
     requestAnimationFrame(loop);
 }
 
-/* START */
+/* START GAME */
 function startGame(){
-    document.getElementById("intro").style.display="none";
+    document.getElementById("intro").style.display = "none";
     init();
-    gameRunning=true;
+    gameRunning = true;
     loop();
 }
 
 /* RESET */
 function resetGame(){
     init();
-    gameRunning=true;
+    gameRunning = true;
     loop();
 }
 
 /* INIT */
-window.onload=function(){
+window.onload = function(){
     initCanvas();
 };
 </script>
