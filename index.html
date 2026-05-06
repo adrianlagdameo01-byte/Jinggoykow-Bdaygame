@@ -8,21 +8,25 @@
 body {
     margin: 0;
     overflow: hidden;
-    background: linear-gradient(#87CEEB, #fff);
+    background: linear-gradient(#87CEEB, #ffffff);
     font-family: Arial;
 }
 
+/* canvas */
 canvas {
     display: block;
 }
 
+/* UI */
 #ui {
     position: absolute;
     top: 10px;
     left: 10px;
     font-size: 18px;
+    z-index: 5;
 }
 
+/* overlays */
 #message, #gameover {
     display: none;
     position: absolute;
@@ -37,8 +41,36 @@ canvas {
     max-height: 70vh;
     overflow-y: auto;
     z-index: 10;
+    box-shadow: 0 0 30px rgba(255, 105, 180, 0.4);
 }
 
+/* floating hearts background */
+.heart-float {
+    position: absolute;
+    color: pink;
+    font-size: 20px;
+    animation: floatUp linear infinite;
+    opacity: 0.7;
+    z-index: 1;
+}
+
+@keyframes floatUp {
+    from { transform: translateY(100vh); }
+    to { transform: translateY(-10vh); }
+}
+
+/* win flash */
+#flash {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: white;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9;
+}
+
+/* buttons */
 button {
     padding: 10px 20px;
     font-size: 16px;
@@ -49,6 +81,8 @@ button {
 
 <body>
 
+<div id="flash"></div>
+
 <div id="ui">Hearts: <span id="score">0</span> / 5</div>
 
 <canvas id="game"></canvas>
@@ -56,7 +90,11 @@ button {
 <div id="message">
 <h2>🎉 You unlocked your surprise 💖</h2>
 <p>
-YOUR MESSAGE HERE 💖
+✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎉🎂🎈🎊🎁🍾🪅🪩 ✨✨✨<br><br>
+
+Tanda mo naaaaaa! Char lang 🤭<br><br>
+
+But seriously... (your full message here) 💖
 </p>
 </div>
 
@@ -72,6 +110,7 @@ let gravity = 0.6;
 let keys = {};
 let gameRunning = true;
 
+/* INIT CANVAS */
 function initCanvas() {
     canvas = document.getElementById("game");
     ctx = canvas.getContext("2d");
@@ -80,6 +119,7 @@ function initCanvas() {
     canvas.height = window.innerHeight;
 }
 
+/* GAME INIT */
 function init() {
     player = { x: 50, y: 300, dy: 0, onGround: false };
 
@@ -106,19 +146,41 @@ function init() {
     document.getElementById("message").style.display = "none";
 }
 
+/* CONTROLS */
 document.addEventListener("keydown", e => keys[e.key] = true);
 document.addEventListener("keyup", e => keys[e.key] = false);
 
+/* PLAYER */
 function drawPlayer() {
     ctx.font = "30px Arial";
     ctx.fillText("👩", player.x, player.y);
 }
 
+/* GROUND */
 function drawGround() {
     ctx.fillStyle = "green";
     ctx.fillRect(0, 350, canvas.width, 50);
 }
 
+/* HEART BURST EFFECT */
+function burst(x, y) {
+    for (let i = 0; i < 6; i++) {
+        ctx.fillText("💖", x + Math.random()*20, y + Math.random()*20);
+    }
+}
+
+/* WIN FLASH */
+function flashScreen() {
+    let flash = document.getElementById("flash");
+    flash.style.transition = "0.5s";
+    flash.style.opacity = 0.7;
+
+    setTimeout(() => {
+        flash.style.opacity = 0;
+    }, 500);
+}
+
+/* LOOP */
 function loop() {
     if (!gameRunning) return;
 
@@ -149,6 +211,7 @@ function loop() {
         ctx.fillText("❤️", h.x, h.y);
 
         if (Math.abs(player.x - h.x) < 20 && Math.abs(player.y - h.y) < 20) {
+            burst(h.x, h.y); // ✨ effect
             hearts.splice(i, 1);
             score++;
             document.getElementById("score").innerText = score;
@@ -167,8 +230,10 @@ function loop() {
 
     ctx.fillText("🎁", goal.x, goal.y);
 
+    // WIN
     if (player.x > goal.x && score >= 5) {
         gameRunning = false;
+        flashScreen();
         document.getElementById("message").style.display = "block";
     }
 
@@ -176,15 +241,32 @@ function loop() {
     requestAnimationFrame(loop);
 }
 
+/* RESTART */
 function resetGame() {
     init();
     loop();
 }
 
+/* FLOATING HEARTS BACKGROUND */
+function spawnHearts() {
+    setInterval(() => {
+        let h = document.createElement("div");
+        h.className = "heart-float";
+        h.innerText = "💗";
+        h.style.left = Math.random() * 100 + "vw";
+        h.style.animationDuration = (3 + Math.random() * 3) + "s";
+        document.body.appendChild(h);
+
+        setTimeout(() => h.remove(), 6000);
+    }, 400);
+}
+
+/* START */
 window.onload = function () {
-    initCanvas();   // 🔥 IMPORTANT FIX
+    initCanvas();
     init();
     loop();
+    spawnHearts();
 };
 </script>
 
