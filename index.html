@@ -309,7 +309,37 @@ function loop() {
 
     let dx = dog.x;
     let dy = dog.y + bob;
+    // 🐶 DOG SPEECH BUBBLE
+ctx.save();
 
+let bubbleX = dx;
+let bubbleY = dy - 40; // above dog
+
+// bubble background
+ctx.fillStyle = "white";
+ctx.strokeStyle = "black";
+ctx.lineWidth = 2;
+
+ctx.beginPath();
+ctx.roundRect(bubbleX - 70, bubbleY - 30, 140, 30, 10);
+ctx.fill();
+ctx.stroke();
+
+// bubble tail
+ctx.beginPath();
+ctx.moveTo(bubbleX - 10, bubbleY);
+ctx.lineTo(bubbleX - 2, bubbleY + 10);
+ctx.lineTo(bubbleX + 5, bubbleY);
+ctx.fill();
+ctx.stroke();
+
+// text
+ctx.fillStyle = "black";
+ctx.font = "12px Arial";
+ctx.textAlign = "center";
+ctx.fillText("Arf! I'm Kayuboi", bubbleX, bubbleY - 10);
+
+ctx.restore();
     ctx.save();
     ctx.translate(dx, dy);
     ctx.scale(dog.dir, 1);
