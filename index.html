@@ -179,29 +179,32 @@ function initCanvas() {
 /* INIT */
 function init() {
 
+    // responsive ground position
+    let groundY = canvas.height - 120;
+
     player = {
         x: 50,
-        y: 300,
+        y: groundY - 30,
         dy: 0,
         onGround: false
     };
 
     hearts = [
-        {x:200, y:300},
-        {x:400, y:250},
-        {x:600, y:300},
-        {x:800, y:220},
-        {x:1000, y:300}
+        {x: 200, y: groundY - 20},
+        {x: 400, y: groundY - 70},
+        {x: 600, y: groundY - 20},
+        {x: 800, y: groundY - 100},
+        {x: 1000, y: groundY - 20}
     ];
 
     spikes = [
-        {x:500, y:330},
-        {x:900, y:330}
+        {x: 500, y: groundY + 10},
+        {x: 900, y: groundY + 10}
     ];
 
     goal = {
-        x:1200,
-        y:300
+        x: 1200,
+        y: groundY - 20
     };
 
     clouds = [
@@ -219,7 +222,6 @@ function init() {
     document.getElementById("message").style.display = "none";
     document.getElementById("gameover").style.display = "none";
 }
-
 /* KEYBOARD */
 document.addEventListener("keydown", e => {
     keys[e.key] = true;
