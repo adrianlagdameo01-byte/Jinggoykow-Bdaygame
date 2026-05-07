@@ -148,36 +148,6 @@ const BASE_W = 1400;
 const BASE_H = 450;
 let scale = 1;
 
-/* =========================
-   MOBILE CONTROLS FIX ONLY
-   ========================= */
-function bindControl(id, keyName) {
-    const el = document.getElementById(id);
-
-    const press = (e) => {
-        e.preventDefault();
-        keys[keyName] = true;
-    };
-
-    const release = (e) => {
-        e.preventDefault();
-        keys[keyName] = false;
-    };
-
-    el.addEventListener("touchstart", press, { passive: false });
-    el.addEventListener("touchend", release);
-    el.addEventListener("touchcancel", release);
-
-    el.addEventListener("mousedown", press);
-    el.addEventListener("mouseup", release);
-    el.addEventListener("mouseleave", release);
-}
-
-bindControl("left", "ArrowLeft");
-bindControl("right", "ArrowRight");
-bindControl("jump", "ArrowUp");
-/* ========================= */
-
 function initCanvas() {
     canvas = document.getElementById("game");
     ctx = canvas.getContext("2d");
@@ -237,6 +207,36 @@ function init() {
 /* INPUT */
 document.addEventListener("keydown", e => keys[e.key] = true);
 document.addEventListener("keyup", e => keys[e.key] = false);
+
+/* ✅ MOBILE CONTROLS FIX (ADDED ONLY) */
+function bindControl(id, key) {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    const down = () => keys[key] = true;
+    const up = () => keys[key] = false;
+
+    el.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        down();
+    }, { passive: false });
+
+    el.addEventListener("touchend", (e) => {
+        e.preventDefault();
+        up();
+    });
+
+    el.addEventListener("touchcancel", up);
+
+    el.addEventListener("mousedown", down);
+    el.addEventListener("mouseup", up);
+    el.addEventListener("mouseleave", up);
+}
+
+bindControl("left", "ArrowLeft");
+bindControl("right", "ArrowRight");
+bindControl("jump", "ArrowUp");
+/* END FIX */
 
 function loop() {
 
@@ -374,6 +374,7 @@ function loop() {
     });
 
     spikes.forEach(s => {
+
         ctx.font = "30px Arial";
         ctx.fillText("💀", s.x, s.y);
 
@@ -394,6 +395,41 @@ function loop() {
         gameRunning = false;
         document.getElementById("message").style.display = "block";
     }
+
+    let bounce = Math.sin(Date.now()*0.015)*2;
+    let legMove = Math.sin(Date.now()*0.02)*4;
+    let armMove = Math.sin(Date.now()*0.03)*6;
+    let hairWave = Math.sin(Date.now()*0.01)*4;
+
+    let px = player.x;
+    let py = player.y + bounce;
+
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.scale(dir === -1 ? -1 : 1, 1);
+
+    ctx.fillStyle = "#3b2a1f";
+    ctx.beginPath();
+    ctx.moveTo(12, -50);
+    ctx.quadraticCurveTo(-25+hairWave, -20, -15, 35);
+    ctx.quadraticCurveTo(12, 50, 35, 10);
+    ctx.fill();
+
+    ctx.fillStyle = "#ff4fa3";
+    ctx.beginPath();
+    ctx.moveTo(12, -20);
+    ctx.lineTo(-25, 30);
+    ctx.lineTo(45, 30);
+    ctx.fill();
+
+    ctx.fillStyle = "#f5cba7";
+    ctx.fillRect(6, -30, 12, 12);
+
+    ctx.beginPath();
+    ctx.arc(12, -45, 12, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.restore();
 
     requestAnimationFrame(loop);
 }
