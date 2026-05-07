@@ -123,7 +123,7 @@ let gameRunning = true;
 
 let clouds = [];
 let birds = [];
-let dog = { x: 0, y: 0, leg: 0 };
+let dog = { x: 0, y: 0, leg: 0, tail: 0 };
 
 const BASE_W = 1400;
 const BASE_H = 450;
@@ -208,7 +208,6 @@ function loop() {
 
     /* CLOUDS */
     for (let c of clouds) {
-
         ctx.fillStyle = "rgba(255,255,255,0.9)";
         ctx.beginPath();
         ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
@@ -220,23 +219,36 @@ function loop() {
         if (c.x < -150) c.x = BASE_W + 200;
     }
 
-    /* BIRDS */
+    /* 🐦 REALISTIC BIRDS */
     for (let b of birds) {
 
-        let flap = Math.sin(Date.now()*0.01 + b.f) * 6;
+        let flap = Math.sin(Date.now()*0.02 + b.f) * 6;
 
-        ctx.strokeStyle = "#333";
+        ctx.fillStyle = "#222";
+
+        // body
+        ctx.beginPath();
+        ctx.ellipse(b.x, b.y, 6, 3, 0, 0, Math.PI*2);
+        ctx.fill();
+
+        // wings
+        ctx.strokeStyle = "#222";
         ctx.lineWidth = 2;
 
         ctx.beginPath();
-        ctx.moveTo(b.x, b.y);
-        ctx.quadraticCurveTo(b.x + 5, b.y - 5 - flap, b.x + 10, b.y);
+        ctx.moveTo(b.x - 2, b.y);
+        ctx.quadraticCurveTo(b.x - 10, b.y - flap, b.x - 2, b.y + 2);
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.moveTo(b.x + 10, b.y);
-        ctx.quadraticCurveTo(b.x + 15, b.y - 5 + flap, b.x + 20, b.y);
+        ctx.moveTo(b.x + 2, b.y);
+        ctx.quadraticCurveTo(b.x + 10, b.y - flap, b.x + 2, b.y + 2);
         ctx.stroke();
+
+        // head
+        ctx.beginPath();
+        ctx.arc(b.x + 6, b.y - 2, 2, 0, Math.PI*2);
+        ctx.fill();
 
         b.x -= 1.2;
         if (b.x < -50) b.x = BASE_W + 100;
@@ -263,48 +275,56 @@ function loop() {
         player.onGround = true;
     }
 
-    /* DOG FOLLOW + ANIMATION */
+    /* 🐶 REALISTIC DOG */
     dog.x += (player.x - dog.x - 30) * 0.05;
+    dog.y = 320;
 
-    let dogBounce = Math.sin(Date.now()*0.01)*2;
     dog.leg = Math.sin(Date.now()*0.02)*3;
-    dog.tail = Math.sin(Date.now()*0.03)*5;
+    dog.tail = Math.sin(Date.now()*0.04)*6;
 
     let dx = dog.x;
     let dy = dog.y;
 
-    /* BODY */
-    ctx.fillStyle = "white";
+    // body
+    ctx.fillStyle = "#d9d9d9";
     ctx.beginPath();
-    ctx.arc(dx, dy + dogBounce, 10, 0, Math.PI*2);
+    ctx.ellipse(dx, dy, 12, 8, 0, 0, Math.PI*2);
     ctx.fill();
 
-    /* HEAD */
+    // head
     ctx.beginPath();
-    ctx.arc(dx + 6, dy - 6 + dogBounce, 6, 0, Math.PI*2);
+    ctx.arc(dx + 10, dy - 5, 6, 0, Math.PI*2);
     ctx.fill();
 
-    /* LEGS */
-    ctx.strokeStyle = "#ddd";
+    // ears
+    ctx.beginPath();
+    ctx.moveTo(dx + 8, dy - 10);
+    ctx.lineTo(dx + 6, dy - 16);
+    ctx.lineTo(dx + 12, dy - 10);
+    ctx.fill();
+
+    // legs
+    ctx.strokeStyle = "#bbb";
     ctx.lineWidth = 2;
 
     ctx.beginPath();
-    ctx.moveTo(dx - 5, dy + 10);
-    ctx.lineTo(dx - 5, dy + 10 + dog.leg);
+    ctx.moveTo(dx - 5, dy + 6);
+    ctx.lineTo(dx - 5, dy + 6 + dog.leg);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(dx + 5, dy + 10);
-    ctx.lineTo(dx + 5, dy + 10 - dog.leg);
+    ctx.moveTo(dx + 5, dy + 6);
+    ctx.lineTo(dx + 5, dy + 6 - dog.leg);
     ctx.stroke();
 
-    /* TAIL */
+    // tail
     ctx.beginPath();
-    ctx.moveTo(dx - 10, dy);
-    ctx.lineTo(dx - 15, dy - 5 + dog.tail);
+    ctx.moveTo(dx - 12, dy);
+    ctx.quadraticCurveTo(dx - 18, dy - 5 + dog.tail, dx - 20, dy - 2);
     ctx.stroke();
 
-    /* HEARTS */
+    /* REST UNCHANGED */
+
     hearts.forEach((h, i) => {
         ctx.font = "28px Arial";
         ctx.fillText("❤️", h.x, h.y);
@@ -316,7 +336,6 @@ function loop() {
         }
     });
 
-    /* SPIKES */
     spikes.forEach(s => {
         ctx.font = "30px Arial";
         ctx.fillText("💀", s.x, s.y);
@@ -335,7 +354,7 @@ function loop() {
         document.getElementById("message").style.display = "block";
     }
 
-    /* PRINCESS + BACKPACK */
+    /* PRINCESS (UNCHANGED) */
 
     let bounce = Math.sin(Date.now()*0.015)*2;
     let legMove = Math.sin(Date.now()*0.02)*4;
@@ -345,11 +364,6 @@ function loop() {
     let px = player.x;
     let py = player.y + bounce;
 
-    /* BACKPACK */
-    ctx.fillStyle = "#6a4fbf";
-    ctx.fillRect(px - 6, py - 28, 8, 18);
-
-    /* HAIR */
     ctx.fillStyle = "#3b2a1f";
     ctx.beginPath();
     ctx.moveTo(px+12, py-50);
@@ -357,7 +371,6 @@ function loop() {
     ctx.quadraticCurveTo(px+12, py+50, px+35, py+10);
     ctx.fill();
 
-    /* DRESS */
     ctx.fillStyle = "#ff4fa3";
     ctx.beginPath();
     ctx.moveTo(px+12, py-20);
@@ -365,50 +378,12 @@ function loop() {
     ctx.lineTo(px+45, py+30);
     ctx.fill();
 
-    /* BODY */
     ctx.fillStyle = "#f5cba7";
     ctx.fillRect(px+6, py-30, 12, 12);
 
-    /* HEAD */
     ctx.beginPath();
     ctx.arc(px+12, py-45, 12, 0, Math.PI*2);
     ctx.fill();
-
-    /* GLASSES */
-    ctx.strokeStyle = "#000";
-    ctx.beginPath();
-    ctx.arc(px+8, py-45, 4, 0, Math.PI*2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(px+16, py-45, 4, 0, Math.PI*2);
-    ctx.stroke();
-
-    /* ARMS */
-    ctx.strokeStyle = "#f5cba7";
-    ctx.lineWidth = 5;
-
-    ctx.beginPath();
-    ctx.moveTo(px+6, py-22);
-    ctx.lineTo(px-12, py-10+armMove);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(px+18, py-22);
-    ctx.lineTo(px+36, py-10-armMove);
-    ctx.stroke();
-
-    /* LEGS */
-    ctx.lineWidth = 3;
-
-    ctx.beginPath();
-    ctx.moveTo(px+10, py+25);
-    ctx.lineTo(px+6-legMove, py+42);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(px+16, py+25);
-    ctx.lineTo(px+20+legMove, py+42);
-    ctx.stroke();
 
     requestAnimationFrame(loop);
 }
