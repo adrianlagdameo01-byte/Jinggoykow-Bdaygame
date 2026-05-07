@@ -122,35 +122,47 @@ function init() {
     document.getElementById("gameover").style.display = "none";
     document.getElementById("message").style.display = "none";
 
-    /* ☁️ CLOUD INIT */
-    clouds = [
-        {x:100,y:60},
-        {x:300,y:100},
-        {x:600,y:70},
-        {x:900,y:120},
-        {x:1200,y:80}
-    ];
+   /* ☁️ CLOUD INIT */
+clouds = [
+    {x:100,y:80},
+    {x:350,y:120},
+    {x:700,y:60},
+    {x:1050,y:100},
+    {x:1400,y:70}
+];
 }
 
 /* INPUT */
 document.addEventListener("keydown", e => keys[e.key] = true);
 document.addEventListener("keyup", e => keys[e.key] = false);
 
+<script>
 /* ☁️ DRAW CLOUDS */
 function drawClouds() {
-    ctx.font = "28px Arial";
 
     for (let c of clouds) {
-        ctx.fillText("☁️", c.x, c.y);
 
-        c.x -= 0.2;
+        ctx.fillStyle = "rgba(255,255,255,0.9)";
 
-        if (c.x < -50) {
-            c.x = canvas.width + 50;
-            c.y = 50 + Math.random() * 120;
+        // main cloud
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, 25, 0, Math.PI * 2);
+        ctx.arc(c.x + 25, c.y + 10, 30, 0, Math.PI * 2);
+        ctx.arc(c.x + 55, c.y, 25, 0, Math.PI * 2);
+        ctx.arc(c.x + 25, c.y - 10, 22, 0, Math.PI * 2);
+        ctx.fill();
+
+        // smooth movement
+        c.x -= 0.35;
+
+        // reset when off screen
+        if (c.x < -120) {
+            c.x = canvas.width + 120;
+            c.y = 40 + Math.random() * 120;
         }
     }
 }
+</script>
 
 /* PLAYER */
 function drawPlayer() {
