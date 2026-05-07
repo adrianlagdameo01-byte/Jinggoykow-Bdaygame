@@ -93,18 +93,10 @@ button {
 
 <div id="message">
 <h2>🎉 You unlocked your surprise 💖</h2>
-
 <p style="line-height:1.6;">
 ✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎉🎂🎈🎊🎁🍾🪅🪩 ✨✨✨
 <br><br>
-Tanda mo naaaaaa! Char lang 🤭 But seriously, I really wish I could spend this whole day with you, especially ngayon na birthday mo.
-<br><br>
-Aside from good health and more blessings sa work, I’m always praying for your safety and genuine happiness. May God continue to give you wisdom as you lead His church and ministry.
-<br><br>
-I know lately hindi tayo masyadong nagkakausap, and I take responsibility for that.
-<br><br>
-But one thing’s for sure—hihintayin kita.
-Kasi mahal na mahal kita, Jinggoykow. ❤️
+Tanda mo naaaaaa! Char lang 🤭
 <br><br>
 —Maximow 🥰
 </p>
@@ -130,6 +122,7 @@ let keys = {};
 let gameRunning = true;
 
 let clouds = [];
+let birds = [];
 
 const BASE_W = 1400;
 const BASE_H = 450;
@@ -150,12 +143,7 @@ function resizeCanvas() {
 
 function init() {
 
-    player = {
-        x: 50,
-        y: 300,
-        dy: 0,
-        onGround: false
-    };
+    player = { x: 50, y: 300, dy: 0, onGround: false };
 
     hearts = [
         {x:200, y:300},
@@ -172,12 +160,20 @@ function init() {
 
     goal = { x:1200, y:300 };
 
+    /* ☁️ CLOUDS (different sizes now) */
     clouds = [
-        {x:100, y:80},
-        {x:350, y:120},
-        {x:700, y:60},
-        {x:1050, y:100},
-        {x:1400, y:70}
+        {x:100, y:80, r:20},
+        {x:350, y:120, r:35},
+        {x:700, y:60, r:25},
+        {x:1050, y:100, r:40},
+        {x:1400, y:70, r:18}
+    ];
+
+    /* 🐦 BIRDS */
+    birds = [
+        {x:200, y:120},
+        {x:600, y:90},
+        {x:1000, y:140}
     ];
 
     score = 0;
@@ -188,6 +184,7 @@ function init() {
     document.getElementById("gameover").style.display = "none";
 }
 
+/* INPUT */
 document.addEventListener("keydown", e => keys[e.key] = true);
 document.addEventListener("keyup", e => keys[e.key] = false);
 
@@ -208,23 +205,38 @@ function loop() {
     ctx.clearRect(0,0,canvas.width,canvas.height);
     ctx.setTransform(scale,0,0,scale,0,0);
 
+    /* ☁️ CLOUDS */
     for (let c of clouds) {
 
         ctx.fillStyle = "rgba(255,255,255,0.9)";
         ctx.beginPath();
-        ctx.arc(c.x, c.y, 25, 0, Math.PI * 2);
-        ctx.arc(c.x + 25, c.y + 10, 30, 0, Math.PI * 2);
-        ctx.arc(c.x + 55, c.y, 25, 0, Math.PI * 2);
-        ctx.arc(c.x + 25, c.y - 10, 22, 0, Math.PI * 2);
+        ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+        ctx.arc(c.x + c.r, c.y + 10, c.r + 10, 0, Math.PI * 2);
+        ctx.arc(c.x + c.r*2, c.y, c.r, 0, Math.PI * 2);
         ctx.fill();
 
-        c.x -= 0.35;
-        if (c.x < -120) c.x = BASE_W + 120;
+        c.x -= 0.3;
+        if (c.x < -150) c.x = BASE_W + 200;
+    }
+
+    /* 🐦 BIRDS */
+    ctx.fillStyle = "#333";
+    for (let b of birds) {
+
+        ctx.beginPath();
+        ctx.moveTo(b.x, b.y);
+        ctx.quadraticCurveTo(b.x + 5, b.y - 5, b.x + 10, b.y);
+        ctx.quadraticCurveTo(b.x + 15, b.y + 5, b.x + 20, b.y);
+        ctx.stroke();
+
+        b.x -= 1.2;
+        if (b.x < -50) b.x = BASE_W + 100;
     }
 
     ctx.fillStyle = "green";
     ctx.fillRect(0, 350, BASE_W, 50);
 
+    /* movement */
     if (keys["ArrowRight"]) player.x += 5;
     if (keys["ArrowLeft"]) player.x -= 5;
 
@@ -242,6 +254,7 @@ function loop() {
         player.onGround = true;
     }
 
+    /* hearts */
     hearts.forEach((h, i) => {
         ctx.font = "28px Arial";
         ctx.fillText("❤️", h.x, h.y);
@@ -253,6 +266,7 @@ function loop() {
         }
     });
 
+    /* spikes */
     spikes.forEach(s => {
         ctx.font = "30px Arial";
         ctx.fillText("💀", s.x, s.y);
@@ -271,69 +285,61 @@ function loop() {
         document.getElementById("message").style.display = "block";
     }
 
-    /* 👑 VIDEO GAME PRINCESS (LONG HAIR UPGRADE) */
+    /* 👑 PRINCESS CHARACTER */
 
-    let bounce = Math.sin(Date.now() * 0.015) * 2;
-    let legMove = Math.sin(Date.now() * 0.02) * 4;
-    let armMove = Math.sin(Date.now() * 0.02) * 3;
-    let hairWave = Math.sin(Date.now() * 0.01) * 4;
+    let bounce = Math.sin(Date.now()*0.015)*2;
+    let legMove = Math.sin(Date.now()*0.02)*4;
+    let armMove = Math.sin(Date.now()*0.02)*3;
+    let hairWave = Math.sin(Date.now()*0.01)*4;
+    let sparkle = Math.sin(Date.now()*0.02)*2;
 
     let px = player.x;
     let py = player.y + bounce;
 
-    /* ===== LONG FLOWING HAIR ===== */
+    /* ===== HAIR ===== */
     ctx.fillStyle = "#3b2a1f";
-
     ctx.beginPath();
-    ctx.moveTo(px + 12, py - 50);
-    ctx.quadraticCurveTo(px - 25 + hairWave, py - 20, px - 15, py + 30);
-    ctx.quadraticCurveTo(px + 12, py + 45, px + 35, py + 10);
-    ctx.quadraticCurveTo(px + 30 - hairWave, py - 15, px + 12, py - 50);
+    ctx.moveTo(px+12, py-50);
+    ctx.quadraticCurveTo(px-25+hairWave, py-20, px-15, py+35);
+    ctx.quadraticCurveTo(px+12, py+50, px+35, py+10);
     ctx.fill();
 
-    /* side strands */
-    ctx.beginPath();
-    ctx.moveTo(px + 2, py - 45);
-    ctx.quadraticCurveTo(px - 20, py - 10, px - 8, py + 25);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.moveTo(px + 22, py - 45);
-    ctx.quadraticCurveTo(px + 45, py - 10, px + 32, py + 25);
-    ctx.fill();
-
-    /* ===== DRESS (game styled) ===== */
+    /* ===== DRESS (real princess gown) ===== */
     ctx.fillStyle = "#ff4fa3";
     ctx.beginPath();
-    ctx.moveTo(px + 12, py - 20);
-    ctx.lineTo(px - 18, py + 25);
-    ctx.lineTo(px + 42, py + 25);
+    ctx.moveTo(px+12, py-20);
+    ctx.lineTo(px-25, py+30);
+    ctx.lineTo(px+45, py+30);
     ctx.closePath();
     ctx.fill();
 
     ctx.fillStyle = "#ff2f8f";
     ctx.beginPath();
-    ctx.moveTo(px + 12, py - 20);
-    ctx.lineTo(px + 2, py + 25);
-    ctx.lineTo(px + 22, py + 25);
+    ctx.moveTo(px+12, py-20);
+    ctx.lineTo(px+2, py+30);
+    ctx.lineTo(px+22, py+30);
     ctx.closePath();
     ctx.fill();
 
     /* BODY */
     ctx.fillStyle = "#f5cba7";
-    ctx.fillRect(px + 6, py - 30, 12, 12);
+    ctx.fillRect(px+6, py-30, 12, 12);
 
     /* HEAD */
-    ctx.fillStyle = "#f5cba7";
     ctx.beginPath();
-    ctx.arc(px + 12, py - 45, 12, 0, Math.PI * 2);
+    ctx.arc(px+12, py-45, 12, 0, Math.PI*2);
     ctx.fill();
 
-    /* eyes */
-    ctx.fillStyle = "#000";
+    /* 👑 CROWN */
+    ctx.fillStyle = "gold";
     ctx.beginPath();
-    ctx.arc(px + 8, py - 47, 2, 0, Math.PI * 2);
-    ctx.arc(px + 16, py - 47, 2, 0, Math.PI * 2);
+    ctx.moveTo(px+2, py-58);
+    ctx.lineTo(px+6, py-68 + sparkle);
+    ctx.lineTo(px+10, py-58);
+    ctx.lineTo(px+14, py-70 - sparkle);
+    ctx.lineTo(px+18, py-58);
+    ctx.lineTo(px+22, py-66 + sparkle);
+    ctx.lineTo(px+26, py-58);
     ctx.fill();
 
     /* ARMS */
@@ -341,30 +347,30 @@ function loop() {
     ctx.lineWidth = 2;
 
     ctx.beginPath();
-    ctx.moveTo(px + 6, py - 22);
-    ctx.lineTo(px - 10, py - 12 + armMove);
+    ctx.moveTo(px+6, py-22);
+    ctx.lineTo(px-10, py-12+armMove);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(px + 18, py - 22);
-    ctx.lineTo(px + 34, py - 12 - armMove);
+    ctx.moveTo(px+18, py-22);
+    ctx.lineTo(px+34, py-12-armMove);
     ctx.stroke();
 
     /* LEGS */
     ctx.beginPath();
-    ctx.moveTo(px + 10, py + 25);
-    ctx.lineTo(px + 6 - legMove, py + 42);
+    ctx.moveTo(px+10, py+25);
+    ctx.lineTo(px+6-legMove, py+42);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(px + 16, py + 25);
-    ctx.lineTo(px + 20 + legMove, py + 42);
+    ctx.moveTo(px+16, py+25);
+    ctx.lineTo(px+20+legMove, py+42);
     ctx.stroke();
 
     /* SHADOW */
     ctx.fillStyle = "rgba(0,0,0,0.15)";
     ctx.beginPath();
-    ctx.ellipse(px + 12, py + 45, 18, 5, 0, 0, Math.PI * 2);
+    ctx.ellipse(px+12, py+45, 18, 5, 0, 0, Math.PI*2);
     ctx.fill();
 
     requestAnimationFrame(loop);
