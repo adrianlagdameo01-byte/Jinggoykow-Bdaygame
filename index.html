@@ -304,14 +304,20 @@ function loop() {
 
     /* SPIKES */
     spikes.forEach(s => {
-        ctx.font = "30px Arial";
-        ctx.fillText("💀", s.x, s.y);
 
-        if (Math.abs(player.x - s.x) < 25) {
-            gameRunning = false;
-            document.getElementById("gameover").style.display = "block";
-        }
-    });
+    ctx.font = "30px Arial";
+    ctx.fillText("💀", s.x, s.y);
+
+    let dx = player.x - s.x;
+    let dy = player.y - s.y;
+
+    let distance = Math.sqrt(dx*dx + dy*dy);
+
+    if (distance < 35) {
+        gameRunning = false;
+        document.getElementById("gameover").style.display = "block";
+    }
+   });
 
     ctx.font = "32px Arial";
     ctx.fillText("🎁", goal.x, goal.y);
