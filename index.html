@@ -123,7 +123,7 @@ let gameRunning = true;
 
 let clouds = [];
 let birds = [];
-let dog = { x: 0, y: 0 };
+let dog = { x: 0, y: 0, leg: 0 };
 
 const BASE_W = 1400;
 const BASE_H = 450;
@@ -146,7 +146,7 @@ function init() {
 
     player = { x: 50, y: 300, dy: 0, onGround: false };
 
-    dog = { x: 20, y: 320 };
+    dog = { x: 20, y: 320, leg: 0, tail: 0 };
 
     hearts = [
         {x:200, y:300},
@@ -220,7 +220,7 @@ function loop() {
         if (c.x < -150) c.x = BASE_W + 200;
     }
 
-    /* BIRDS (FLAPPING) */
+    /* BIRDS */
     for (let b of birds) {
 
         let flap = Math.sin(Date.now()*0.01 + b.f) * 6;
@@ -245,7 +245,7 @@ function loop() {
     ctx.fillStyle = "green";
     ctx.fillRect(0, 350, BASE_W, 50);
 
-    /* MOVEMENT */
+    /* PLAYER */
     if (keys["ArrowRight"]) player.x += 5;
     if (keys["ArrowLeft"]) player.x -= 5;
 
@@ -263,19 +263,46 @@ function loop() {
         player.onGround = true;
     }
 
-    /* DOG FOLLOW */
+    /* DOG FOLLOW + ANIMATION */
     dog.x += (player.x - dog.x - 30) * 0.05;
-    dog.y = 320;
 
+    let dogBounce = Math.sin(Date.now()*0.01)*2;
+    dog.leg = Math.sin(Date.now()*0.02)*3;
+    dog.tail = Math.sin(Date.now()*0.03)*5;
+
+    let dx = dog.x;
+    let dy = dog.y;
+
+    /* BODY */
     ctx.fillStyle = "white";
     ctx.beginPath();
-    ctx.arc(dog.x, dog.y, 10, 0, Math.PI*2);
+    ctx.arc(dx, dy + dogBounce, 10, 0, Math.PI*2);
     ctx.fill();
 
-    ctx.fillStyle = "#ddd";
+    /* HEAD */
     ctx.beginPath();
-    ctx.arc(dog.x + 6, dog.y - 8, 5, 0, Math.PI*2);
+    ctx.arc(dx + 6, dy - 6 + dogBounce, 6, 0, Math.PI*2);
     ctx.fill();
+
+    /* LEGS */
+    ctx.strokeStyle = "#ddd";
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    ctx.moveTo(dx - 5, dy + 10);
+    ctx.lineTo(dx - 5, dy + 10 + dog.leg);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(dx + 5, dy + 10);
+    ctx.lineTo(dx + 5, dy + 10 - dog.leg);
+    ctx.stroke();
+
+    /* TAIL */
+    ctx.beginPath();
+    ctx.moveTo(dx - 10, dy);
+    ctx.lineTo(dx - 15, dy - 5 + dog.tail);
+    ctx.stroke();
 
     /* HEARTS */
     hearts.forEach((h, i) => {
@@ -294,7 +321,7 @@ function loop() {
         ctx.font = "30px Arial";
         ctx.fillText("💀", s.x, s.y);
 
-        if (Math.abs(player.x - s.x) < 25 && Math.abs(player.y - s.y) < 25) {
+        if (Math.abs(player.x - s.x) < 25) {
             gameRunning = false;
             document.getElementById("gameover").style.display = "block";
         }
@@ -308,7 +335,8 @@ function loop() {
         document.getElementById("message").style.display = "block";
     }
 
-    /* PRINCESS */
+    /* PRINCESS + BACKPACK */
+
     let bounce = Math.sin(Date.now()*0.015)*2;
     let legMove = Math.sin(Date.now()*0.02)*4;
     let armMove = Math.sin(Date.now()*0.02)*3;
@@ -316,6 +344,10 @@ function loop() {
 
     let px = player.x;
     let py = player.y + bounce;
+
+    /* BACKPACK */
+    ctx.fillStyle = "#6a4fbf";
+    ctx.fillRect(px - 6, py - 28, 8, 18);
 
     /* HAIR */
     ctx.fillStyle = "#3b2a1f";
@@ -351,7 +383,7 @@ function loop() {
     ctx.arc(px+16, py-45, 4, 0, Math.PI*2);
     ctx.stroke();
 
-    /* ARMS (THICK + HANDS) */
+    /* ARMS */
     ctx.strokeStyle = "#f5cba7";
     ctx.lineWidth = 5;
 
@@ -359,32 +391,24 @@ function loop() {
     ctx.moveTo(px+6, py-22);
     ctx.lineTo(px-12, py-10+armMove);
     ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(px-12, py-10+armMove, 4, 0, Math.PI*2);
-    ctx.fill();
 
     ctx.beginPath();
     ctx.moveTo(px+18, py-22);
     ctx.lineTo(px+36, py-10-armMove);
     ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(px+36, py-10-armMove, 4, 0, Math.PI*2);
-    ctx.fill();
 
-    /* LEGS + SHOES */
+    /* LEGS */
     ctx.lineWidth = 3;
 
     ctx.beginPath();
     ctx.moveTo(px+10, py+25);
     ctx.lineTo(px+6-legMove, py+42);
     ctx.stroke();
-    ctx.fillRect(px+4-legMove, py+42, 8, 4);
 
     ctx.beginPath();
     ctx.moveTo(px+16, py+25);
     ctx.lineTo(px+20+legMove, py+42);
     ctx.stroke();
-    ctx.fillRect(px+18+legMove, py+42, 8, 4);
 
     requestAnimationFrame(loop);
 }
