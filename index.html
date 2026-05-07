@@ -161,6 +161,7 @@ Kasi mahal na mahal kita, Jinggoykow. ❤️
 
 let canvas, ctx;
 let player, hearts, spikes, goal, score;
+let floor;
 let gravity = 0.6;
 let keys = {};
 let gameRunning = true;
@@ -179,6 +180,7 @@ function initCanvas() {
 /* INIT */
 function init() {
 
+    // FLOOR POSITION
     floor = canvas.height - 140;
 
     player = {
@@ -189,21 +191,21 @@ function init() {
     };
 
     hearts = [
-        {x: 200, y: floor - 30},
-        {x: 400, y: floor - 80},
-        {x: 600, y: floor - 30},
-        {x: 800, y: floor - 100},
-        {x: 1000, y: floor - 30}
+        {x: 200, y: floor - 40},
+        {x: 400, y: floor - 90},
+        {x: 600, y: floor - 40},
+        {x: 800, y: floor - 110},
+        {x: 1000, y: floor - 40}
     ];
 
     spikes = [
-        {x: 500, y: floor + 5},
-        {x: 900, y: floor + 5}
+        {x: 500, y: floor + 25},
+        {x: 900, y: floor + 25}
     ];
 
     goal = {
         x: 1200,
-        y: floor - 10
+        y: floor - 20
     };
 
     clouds = [
