@@ -166,8 +166,61 @@ function drawClouds() {
 
 /* PLAYER */
 function drawPlayer() {
-    ctx.font = "30px Arial";
-    ctx.fillText("👩", player.x, player.y);
+
+    // animation bounce like Mario
+    let bounce = Math.sin(Date.now() * 0.015) * 2;
+
+    // body
+    ctx.fillStyle = "#ff69b4";
+    ctx.fillRect(player.x, player.y - 35 + bounce, 24, 35);
+
+    // face
+    ctx.fillStyle = "#f5cba7";
+    ctx.beginPath();
+    ctx.arc(player.x + 12, player.y - 45 + bounce, 10, 0, Math.PI * 2);
+    ctx.fill();
+
+    // hair
+    ctx.fillStyle = "#5d4037";
+    ctx.beginPath();
+    ctx.arc(player.x + 12, player.y - 48 + bounce, 11, Math.PI, 0);
+    ctx.fill();
+
+    // skirt
+    ctx.fillStyle = "#ff1493";
+    ctx.beginPath();
+    ctx.moveTo(player.x + 2, player.y - 5 + bounce);
+    ctx.lineTo(player.x + 22, player.y - 5 + bounce);
+    ctx.lineTo(player.x + 12, player.y + 8 + bounce);
+    ctx.fill();
+
+    // legs
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 2;
+
+    // animated walking legs
+    let legMove = Math.sin(Date.now() * 0.02) * 4;
+
+    ctx.beginPath();
+    ctx.moveTo(player.x + 8, player.y + bounce);
+    ctx.lineTo(player.x + 8 - legMove, player.y + 15 + bounce);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(player.x + 16, player.y + bounce);
+    ctx.lineTo(player.x + 16 + legMove, player.y + 15 + bounce);
+    ctx.stroke();
+
+    // arms
+    ctx.beginPath();
+    ctx.moveTo(player.x + 2, player.y - 20 + bounce);
+    ctx.lineTo(player.x - 8, player.y - 10 + bounce);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(player.x + 22, player.y - 20 + bounce);
+    ctx.lineTo(player.x + 32, player.y - 10 + bounce);
+    ctx.stroke();
 }
 
 function drawGround() {
