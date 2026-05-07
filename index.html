@@ -2,17 +2,14 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>For Jinggoykow 💖</title>
 
 <style>
-
 body {
     margin: 0;
     overflow: hidden;
-    background: linear-gradient(#87CEEB, #ffffff);
+    background: linear-gradient(#87CEEB, #fff);
     font-family: Arial;
     touch-action: none;
 }
@@ -21,19 +18,16 @@ canvas {
     display: block;
 }
 
-/* UI */
 #ui {
     position: absolute;
     top: 10px;
     left: 10px;
-    font-size: 22px;
-    font-weight: bold;
+    font-size: 18px;
     color: white;
     text-shadow: 2px 2px 4px black;
     z-index: 10;
 }
 
-/* POPUPS */
 #message, #gameover, #rotate {
     display: none;
     position: absolute;
@@ -42,27 +36,25 @@ canvas {
     transform: translateX(-50%);
     background: white;
     padding: 20px;
-    border-radius: 20px;
-    max-width: 700px;
+    border-radius: 15px;
+    max-width: 650px;
     width: 85%;
     text-align: center;
     max-height: 70vh;
     overflow-y: auto;
     z-index: 20;
-    box-shadow: 0 0 20px rgba(0,0,0,0.3);
 }
 
 button {
-    padding: 12px 22px;
+    padding: 10px 20px;
     font-size: 16px;
     border: none;
     border-radius: 10px;
     background: hotpink;
     color: white;
-    cursor: pointer;
 }
 
-/* MOBILE CONTROLS */
+/* mobile controls */
 #controls {
     position: absolute;
     bottom: 20px;
@@ -70,32 +62,17 @@ button {
     display: flex;
     justify-content: space-between;
     z-index: 15;
-    pointer-events: none;
 }
 
-.control-group {
-    display: flex;
-    gap: 10px;
-    padding: 0 20px;
-    pointer-events: auto;
-}
-
-.control-btn {
+.btn {
     width: 70px;
     height: 70px;
     border-radius: 50%;
-    border: none;
-    background: rgba(255,105,180,0.85);
+    background: rgba(255,105,180,0.8);
     color: white;
-    font-size: 30px;
+    font-size: 24px;
+    border: none;
 }
-
-/* ROTATE MESSAGE */
-#rotate {
-    display: none;
-    top: 30%;
-}
-
 </style>
 </head>
 
@@ -105,172 +82,116 @@ button {
 
 <canvas id="game"></canvas>
 
-<!-- MOBILE CONTROLS -->
 <div id="controls">
-
-    <div class="control-group">
-        <button class="control-btn" id="leftBtn">⬅️</button>
-        <button class="control-btn" id="rightBtn">➡️</button>
-    </div>
-
-    <div class="control-group">
-        <button class="control-btn" id="jumpBtn">⬆️</button>
-    </div>
-
+    <button class="btn" id="left">⬅️</button>
+    <button class="btn" id="jump">⬆️</button>
+    <button class="btn" id="right">➡️</button>
 </div>
 
-<!-- ROTATE -->
 <div id="rotate">
-    <h2>📱 Rotate Your Phone</h2>
-    <p>Please rotate to landscape mode 💖</p>
+<h2>📱 Rotate Device</h2>
+<p>Please rotate to landscape 💖</p>
 </div>
 
-<!-- MESSAGE -->
 <div id="message">
-
-<h2>🎉 You unlocked your surprise 💖</h2>
-
-<p style="line-height:1.6;">
-
-✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎉🎂🎈🎊🎁🍾🪅🪩 ✨✨✨
-<br><br>
-
-Tanda mo naaaaaa! Char lang 🤭 But seriously, I really wish I could spend this whole day with you, especially ngayon na birthday mo.
-<br><br>
-
-Aside from good health and more blessings sa work, I’m always praying for your safety and genuine happiness.
-<br><br>
-
-But one thing’s for sure—hihintayin kita.
-Kasi mahal na mahal kita, Jinggoykow. ❤️
-<br><br>
-
-—Maximow 🥰
-
-</p>
-
+<h2>🎉 Surprise Unlocked 💖</h2>
+<p>Happy Birthday Jinggoykow ❤️</p>
 </div>
 
-<!-- GAME OVER -->
 <div id="gameover">
-    <h2>💀 Ouch! Try Again 😅</h2>
-    <button onclick="resetGame()">Try Again</button>
+<h2>💀 Try Again</h2>
+<button onclick="resetGame()">Restart</button>
 </div>
 
 <script>
 
 let canvas, ctx;
 let player, hearts, spikes, goal, score;
-let floor;
 let gravity = 0.6;
 let keys = {};
 let gameRunning = true;
+
 let clouds = [];
+let groundY;
 
 /* CANVAS */
 function initCanvas() {
-
     canvas = document.getElementById("game");
     ctx = canvas.getContext("2d");
-
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 }
 
-/* INIT */
+/* INIT GAME */
 function init() {
 
-    // FLOOR POSITION
-    floor = canvas.height - 140;
+    groundY = canvas.height * 0.78;
 
     player = {
         x: 50,
-        y: floor,
+        y: groundY,
         dy: 0,
         onGround: false
     };
 
     hearts = [
-        {x: 200, y: floor - 40},
-        {x: 400, y: floor - 90},
-        {x: 600, y: floor - 40},
-        {x: 800, y: floor - 110},
-        {x: 1000, y: floor - 40}
+        {x:200,y:groundY-60},
+        {x:400,y:groundY-120},
+        {x:600,y:groundY-60},
+        {x:800,y:groundY-140},
+        {x:1000,y:groundY-60}
     ];
 
     spikes = [
-        {x: 500, y: floor + 25},
-        {x: 900, y: floor + 25}
+        {x:500,y:groundY-10},
+        {x:900,y:groundY-10}
     ];
 
-    goal = {
-        x: 1200,
-        y: floor - 20
-    };
+    goal = { x:1200, y:groundY-70 };
 
     clouds = [
-        {x:100, y:80},
-        {x:350, y:120},
-        {x:700, y:60},
-        {x:1050, y:100},
-        {x:1400, y:70}
+        {x:100,y:80},
+        {x:300,y:120},
+        {x:600,y:70},
+        {x:900,y:100},
+        {x:1200,y:60}
     ];
 
     score = 0;
     gameRunning = true;
 
     document.getElementById("score").innerText = score;
-    document.getElementById("message").style.display = "none";
-    document.getElementById("gameover").style.display = "none";
-}
-    /* KEYBOARD */
-document.addEventListener("keydown", e => {
-    keys[e.key] = true;
-});
-
-document.addEventListener("keyup", e => {
-    keys[e.key] = false;
-});
-
-/* MOBILE TOUCH */
-function bindButton(id, key) {
-
-    const btn = document.getElementById(id);
-
-    btn.addEventListener("touchstart", e => {
-        e.preventDefault();
-        keys[key] = true;
-    });
-
-    btn.addEventListener("touchend", e => {
-        e.preventDefault();
-        keys[key] = false;
-    });
 }
 
-bindButton("leftBtn", "ArrowLeft");
-bindButton("rightBtn", "ArrowRight");
-bindButton("jumpBtn", "ArrowUp");
+/* INPUT */
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
+
+/* TOUCH */
+document.getElementById("left").ontouchstart = () => keys["ArrowLeft"] = true;
+document.getElementById("left").ontouchend = () => keys["ArrowLeft"] = false;
+
+document.getElementById("right").ontouchstart = () => keys["ArrowRight"] = true;
+document.getElementById("right").ontouchend = () => keys["ArrowRight"] = false;
+
+document.getElementById("jump").ontouchstart = () => {
+    if (player.onGround) player.dy = -12;
+};
 
 /* CLOUDS */
 function drawClouds() {
-
     for (let c of clouds) {
-
         ctx.fillStyle = "rgba(255,255,255,0.9)";
-
         ctx.beginPath();
-        ctx.arc(c.x, c.y, 25, 0, Math.PI * 2);
-        ctx.arc(c.x + 25, c.y + 10, 30, 0, Math.PI * 2);
-        ctx.arc(c.x + 55, c.y, 25, 0, Math.PI * 2);
-        ctx.arc(c.x + 25, c.y - 10, 22, 0, Math.PI * 2);
+        ctx.arc(c.x,c.y,25,0,Math.PI*2);
+        ctx.arc(c.x+25,c.y+10,30,0,Math.PI*2);
+        ctx.arc(c.x+55,c.y,25,0,Math.PI*2);
         ctx.fill();
 
-        c.x -= 0.35;
-
-        if (c.x < -120) {
-            c.x = canvas.width + 120;
-            c.y = 40 + Math.random() * 120;
+        c.x -= 0.3;
+        if (c.x < -100) {
+            c.x = canvas.width + 100;
+            c.y = 50 + Math.random()*120;
         }
     }
 }
@@ -278,49 +199,22 @@ function drawClouds() {
 /* PLAYER */
 function drawPlayer() {
 
-    let bounce = Math.sin(Date.now() * 0.015) * 2;
+    let bounce = Math.sin(Date.now()*0.015)*2;
+    let y = player.y - 50 + bounce;
 
     ctx.fillStyle = "#ff69b4";
-    ctx.fillRect(player.x, player.y - 35 + bounce, 24, 35);
+    ctx.fillRect(player.x,y,24,35);
 
     ctx.fillStyle = "#f5cba7";
     ctx.beginPath();
-    ctx.arc(player.x + 12, player.y - 45 + bounce, 10, 0, Math.PI * 2);
+    ctx.arc(player.x+12,y-10,10,0,Math.PI*2);
     ctx.fill();
-
-    ctx.fillStyle = "#5d4037";
-    ctx.beginPath();
-    ctx.arc(player.x + 12, player.y - 48 + bounce, 11, Math.PI, 0);
-    ctx.fill();
-
-    ctx.fillStyle = "#ff1493";
-    ctx.beginPath();
-    ctx.moveTo(player.x + 2, player.y - 5 + bounce);
-    ctx.lineTo(player.x + 22, player.y - 5 + bounce);
-    ctx.lineTo(player.x + 12, player.y + 8 + bounce);
-    ctx.fill();
-
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 2;
-
-    let legMove = Math.sin(Date.now() * 0.02) * 4;
-
-    ctx.beginPath();
-    ctx.moveTo(player.x + 8, player.y + bounce);
-    ctx.lineTo(player.x + 8 - legMove, player.y + 15 + bounce);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(player.x + 16, player.y + bounce);
-    ctx.lineTo(player.x + 16 + legMove, player.y + 15 + bounce);
-    ctx.stroke();
 }
 
 /* GROUND */
 function drawGround() {
-
     ctx.fillStyle = "green";
-    ctx.fillRect(0, 350, canvas.width, 50);
+    ctx.fillRect(0,groundY+20,canvas.width,canvas.height);
 }
 
 /* LOOP */
@@ -328,7 +222,7 @@ function loop() {
 
     if (!gameRunning) return;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0,0,canvas.width,canvas.height);
 
     drawClouds();
     drawGround();
@@ -344,88 +238,66 @@ function loop() {
     player.dy += gravity;
     player.y += player.dy;
 
-    if (player.y >= 320) {
-        player.y = 320;
+    if (player.y >= groundY) {
+        player.y = groundY;
         player.dy = 0;
         player.onGround = true;
     }
 
-    hearts.forEach((h, i) => {
-
-        ctx.font = "28px Arial";
-        ctx.fillText("❤️", h.x, h.y);
-
-        if (
-            Math.abs(player.x - h.x) < 25 &&
-            Math.abs(player.y - h.y) < 25
-        ) {
-            hearts.splice(i, 1);
+    /* HEARTS */
+    hearts.forEach((h,i)=>{
+        ctx.fillText("❤️",h.x,h.y);
+        if (Math.abs(player.x-h.x)<25 && Math.abs(player.y-h.y)<50){
+            hearts.splice(i,1);
             score++;
-
             document.getElementById("score").innerText = score;
         }
     });
 
-    spikes.forEach(s => {
-
-        ctx.font = "30px Arial";
-        ctx.fillText("💀", s.x, s.y);
-
-        if (
-            Math.abs(player.x - s.x) < 25 &&
-            Math.abs(player.y - s.y) < 25
-        ) {
+    /* SPIKES */
+    spikes.forEach(s=>{
+        ctx.fillText("💀",s.x,s.y);
+        if (Math.abs(player.x-s.x)<25 && Math.abs(player.y-s.y)<50){
             gameRunning = false;
-            document.getElementById("gameover").style.display = "block";
+            document.getElementById("gameover").style.display="block";
         }
     });
 
-    ctx.font = "32px Arial";
-    ctx.fillText("🎁", goal.x, goal.y);
+    ctx.fillText("🎁",goal.x,goal.y);
 
-    if (player.x > goal.x && score >= 5) {
-
+    if (player.x > goal.x && score >= 5){
         gameRunning = false;
-        document.getElementById("message").style.display = "block";
+        document.getElementById("message").style.display="block";
     }
 
     drawPlayer();
-
     requestAnimationFrame(loop);
 }
 
 /* RESET */
-function resetGame() {
-
+function resetGame(){
     init();
     loop();
 }
 
-/* ROTATION CHECK */
-function checkOrientation() {
-
-    const rotate = document.getElementById("rotate");
-
-    if (window.innerHeight > window.innerWidth) {
-        rotate.style.display = "block";
-    } else {
-        rotate.style.display = "none";
-    }
+/* ORIENTATION */
+function checkRotate(){
+    document.getElementById("rotate").style.display =
+    window.innerHeight > window.innerWidth ? "block" : "none";
 }
-
-window.addEventListener("resize", () => {
-
-    initCanvas();
-    checkOrientation();
-});
 
 /* START */
-window.onload = function() {
-
+window.onload = function(){
     initCanvas();
     init();
-    checkOrientation();
+    checkRotate();
     loop();
+};
+
+window.onresize = function(){
+    initCanvas();
+    init();
+    checkRotate();
 };
 
 </script>
