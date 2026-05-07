@@ -179,32 +179,35 @@ function initCanvas() {
 /* INIT */
 function init() {
 
-    // responsive ground position
-    let groundY = canvas.height - 120;
+    // dynamic floor
+    let floor = canvas.height - 120;
 
     player = {
         x: 50,
-        y: groundY - 30,
+        y: floor,
         dy: 0,
         onGround: false
     };
 
+    // LOWER hearts so they're visible
     hearts = [
-        {x: 200, y: groundY - 20},
-        {x: 400, y: groundY - 70},
-        {x: 600, y: groundY - 20},
-        {x: 800, y: groundY - 100},
-        {x: 1000, y: groundY - 20}
+        {x: 200, y: floor - 20},
+        {x: 400, y: floor - 50},
+        {x: 600, y: floor - 20},
+        {x: 800, y: floor - 70},
+        {x: 1000, y: floor - 20}
     ];
 
+    // skulls ABOVE ground
     spikes = [
-        {x: 500, y: groundY + 10},
-        {x: 900, y: groundY + 10}
+        {x: 500, y: floor + 10},
+        {x: 900, y: floor + 10}
     ];
 
+    // gift visible
     goal = {
         x: 1200,
-        y: groundY - 20
+        y: floor - 10
     };
 
     clouds = [
@@ -222,7 +225,7 @@ function init() {
     document.getElementById("message").style.display = "none";
     document.getElementById("gameover").style.display = "none";
 }
-/* KEYBOARD */
+    /* KEYBOARD */
 document.addEventListener("keydown", e => {
     keys[e.key] = true;
 });
