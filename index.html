@@ -2,20 +2,26 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 <title>For Jinggoykow 💖</title>
 
 <style>
+
 body {
     margin: 0;
     overflow: hidden;
     background: linear-gradient(#87CEEB, #ffffff);
     font-family: Arial;
+    touch-action: none;
 }
 
 canvas {
     display: block;
 }
 
+/* UI */
 #ui {
     position: absolute;
     top: 10px;
@@ -27,7 +33,8 @@ canvas {
     z-index: 10;
 }
 
-#message, #gameover {
+/* POPUPS */
+#message, #gameover, #rotate {
     display: none;
     position: absolute;
     top: 10%;
@@ -54,6 +61,41 @@ button {
     color: white;
     cursor: pointer;
 }
+
+/* MOBILE CONTROLS */
+#controls {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    z-index: 15;
+    pointer-events: none;
+}
+
+.control-group {
+    display: flex;
+    gap: 10px;
+    padding: 0 20px;
+    pointer-events: auto;
+}
+
+.control-btn {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,105,180,0.85);
+    color: white;
+    font-size: 30px;
+}
+
+/* ROTATE MESSAGE */
+#rotate {
+    display: none;
+    top: 30%;
+}
+
 </style>
 </head>
 
@@ -63,20 +105,40 @@ button {
 
 <canvas id="game"></canvas>
 
+<!-- MOBILE CONTROLS -->
+<div id="controls">
+
+    <div class="control-group">
+        <button class="control-btn" id="leftBtn">⬅️</button>
+        <button class="control-btn" id="rightBtn">➡️</button>
+    </div>
+
+    <div class="control-group">
+        <button class="control-btn" id="jumpBtn">⬆️</button>
+    </div>
+
+</div>
+
+<!-- ROTATE -->
+<div id="rotate">
+    <h2>📱 Rotate Your Phone</h2>
+    <p>Please rotate to landscape mode 💖</p>
+</div>
+
+<!-- MESSAGE -->
 <div id="message">
+
 <h2>🎉 You unlocked your surprise 💖</h2>
 
 <p style="line-height:1.6;">
+
 ✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎉🎂🎈🎊🎁🍾🪅🪩 ✨✨✨
 <br><br>
 
 Tanda mo naaaaaa! Char lang 🤭 But seriously, I really wish I could spend this whole day with you, especially ngayon na birthday mo.
 <br><br>
 
-Aside from good health and more blessings sa work, I’m always praying for your safety and genuine happiness. May God continue to give you wisdom as you lead His church and ministry.
-<br><br>
-
-I know lately hindi tayo masyadong nagkakausap, and I take responsibility for that.
+Aside from good health and more blessings sa work, I’m always praying for your safety and genuine happiness.
 <br><br>
 
 But one thing’s for sure—hihintayin kita.
@@ -84,13 +146,15 @@ Kasi mahal na mahal kita, Jinggoykow. ❤️
 <br><br>
 
 —Maximow 🥰
+
 </p>
 
 </div>
 
+<!-- GAME OVER -->
 <div id="gameover">
-<h2>💀 Ouch! Try Again 😅</h2>
-<button onclick="resetGame()">Try Again</button>
+    <h2>💀 Ouch! Try Again 😅</h2>
+    <button onclick="resetGame()">Try Again</button>
 </div>
 
 <script>
@@ -100,10 +164,9 @@ let player, hearts, spikes, goal, score;
 let gravity = 0.6;
 let keys = {};
 let gameRunning = true;
-
 let clouds = [];
 
-/* INIT */
+/* CANVAS */
 function initCanvas() {
 
     canvas = document.getElementById("game");
@@ -113,6 +176,7 @@ function initCanvas() {
     canvas.height = window.innerHeight;
 }
 
+/* INIT */
 function init() {
 
     player = {
@@ -156,7 +220,7 @@ function init() {
     document.getElementById("gameover").style.display = "none";
 }
 
-/* INPUT */
+/* KEYBOARD */
 document.addEventListener("keydown", e => {
     keys[e.key] = true;
 });
@@ -164,6 +228,26 @@ document.addEventListener("keydown", e => {
 document.addEventListener("keyup", e => {
     keys[e.key] = false;
 });
+
+/* MOBILE TOUCH */
+function bindButton(id, key) {
+
+    const btn = document.getElementById(id);
+
+    btn.addEventListener("touchstart", e => {
+        e.preventDefault();
+        keys[key] = true;
+    });
+
+    btn.addEventListener("touchend", e => {
+        e.preventDefault();
+        keys[key] = false;
+    });
+}
+
+bindButton("leftBtn", "ArrowLeft");
+bindButton("rightBtn", "ArrowRight");
+bindButton("jumpBtn", "ArrowUp");
 
 /* CLOUDS */
 function drawClouds() {
@@ -193,23 +277,19 @@ function drawPlayer() {
 
     let bounce = Math.sin(Date.now() * 0.015) * 2;
 
-    // body
     ctx.fillStyle = "#ff69b4";
     ctx.fillRect(player.x, player.y - 35 + bounce, 24, 35);
 
-    // face
     ctx.fillStyle = "#f5cba7";
     ctx.beginPath();
     ctx.arc(player.x + 12, player.y - 45 + bounce, 10, 0, Math.PI * 2);
     ctx.fill();
 
-    // hair
     ctx.fillStyle = "#5d4037";
     ctx.beginPath();
     ctx.arc(player.x + 12, player.y - 48 + bounce, 11, Math.PI, 0);
     ctx.fill();
 
-    // skirt
     ctx.fillStyle = "#ff1493";
     ctx.beginPath();
     ctx.moveTo(player.x + 2, player.y - 5 + bounce);
@@ -217,7 +297,6 @@ function drawPlayer() {
     ctx.lineTo(player.x + 12, player.y + 8 + bounce);
     ctx.fill();
 
-    // moving legs
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 2;
 
@@ -232,17 +311,6 @@ function drawPlayer() {
     ctx.moveTo(player.x + 16, player.y + bounce);
     ctx.lineTo(player.x + 16 + legMove, player.y + 15 + bounce);
     ctx.stroke();
-
-    // arms
-    ctx.beginPath();
-    ctx.moveTo(player.x + 2, player.y - 20 + bounce);
-    ctx.lineTo(player.x - 8, player.y - 10 + bounce);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(player.x + 22, player.y - 20 + bounce);
-    ctx.lineTo(player.x + 32, player.y - 10 + bounce);
-    ctx.stroke();
 }
 
 /* GROUND */
@@ -252,7 +320,7 @@ function drawGround() {
     ctx.fillRect(0, 350, canvas.width, 50);
 }
 
-/* GAME LOOP */
+/* LOOP */
 function loop() {
 
     if (!gameRunning) return;
@@ -262,21 +330,14 @@ function loop() {
     drawClouds();
     drawGround();
 
-    /* MOVEMENT */
-    if (keys["ArrowRight"]) {
-        player.x += 5;
-    }
-
-    if (keys["ArrowLeft"]) {
-        player.x -= 5;
-    }
+    if (keys["ArrowRight"]) player.x += 5;
+    if (keys["ArrowLeft"]) player.x -= 5;
 
     if (keys["ArrowUp"] && player.onGround) {
         player.dy = -12;
         player.onGround = false;
     }
 
-    /* GRAVITY */
     player.dy += gravity;
     player.y += player.dy;
 
@@ -286,7 +347,6 @@ function loop() {
         player.onGround = true;
     }
 
-    /* HEARTS */
     hearts.forEach((h, i) => {
 
         ctx.font = "28px Arial";
@@ -303,7 +363,6 @@ function loop() {
         }
     });
 
-    /* SPIKES */
     spikes.forEach(s => {
 
         ctx.font = "30px Arial";
@@ -318,15 +377,12 @@ function loop() {
         }
     });
 
-    /* GIFT */
     ctx.font = "32px Arial";
     ctx.fillText("🎁", goal.x, goal.y);
 
-    /* WIN */
     if (player.x > goal.x && score >= 5) {
 
         gameRunning = false;
-
         document.getElementById("message").style.display = "block";
     }
 
@@ -342,11 +398,30 @@ function resetGame() {
     loop();
 }
 
+/* ROTATION CHECK */
+function checkOrientation() {
+
+    const rotate = document.getElementById("rotate");
+
+    if (window.innerHeight > window.innerWidth) {
+        rotate.style.display = "block";
+    } else {
+        rotate.style.display = "none";
+    }
+}
+
+window.addEventListener("resize", () => {
+
+    initCanvas();
+    checkOrientation();
+});
+
 /* START */
 window.onload = function() {
 
     initCanvas();
     init();
+    checkOrientation();
     loop();
 };
 
