@@ -13,7 +13,6 @@ body {
     font-family: Arial;
 }
 
-/* Canvas fills screen but keeps scaling correct */
 canvas {
     display: block;
     width: 100vw;
@@ -60,7 +59,6 @@ button {
     cursor: pointer;
 }
 
-/* MOBILE CONTROLS */
 #controls {
     position: absolute;
     bottom: 20px;
@@ -117,7 +115,6 @@ Kasi mahal na mahal kita, Jinggoykow. ❤️
 <button onclick="resetGame()">Try Again</button>
 </div>
 
-<!-- MOBILE CONTROLS -->
 <div id="controls">
     <div class="ctrl" id="left">⬅️</div>
     <div class="ctrl" id="jump">⬆️</div>
@@ -134,31 +131,23 @@ let gameRunning = true;
 
 let clouds = [];
 
-/* BASE SCALE SYSTEM */
 const BASE_W = 1400;
 const BASE_H = 450;
 let scale = 1;
 
-/* INIT CANVAS */
 function initCanvas() {
-
     canvas = document.getElementById("game");
     ctx = canvas.getContext("2d");
-
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 }
 
-/* RESPONSIVE SCALING */
 function resizeCanvas() {
-
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-
     scale = Math.min(canvas.width / BASE_W, canvas.height / BASE_H);
 }
 
-/* INIT GAME */
 function init() {
 
     player = {
@@ -199,11 +188,9 @@ function init() {
     document.getElementById("gameover").style.display = "none";
 }
 
-/* INPUT */
 document.addEventListener("keydown", e => keys[e.key] = true);
 document.addEventListener("keyup", e => keys[e.key] = false);
 
-/* TOUCH CONTROLS */
 document.getElementById("left").addEventListener("touchstart", () => keys["ArrowLeft"] = true);
 document.getElementById("left").addEventListener("touchend", () => keys["ArrowLeft"] = false);
 
@@ -213,19 +200,14 @@ document.getElementById("right").addEventListener("touchend", () => keys["ArrowR
 document.getElementById("jump").addEventListener("touchstart", () => keys["ArrowUp"] = true);
 document.getElementById("jump").addEventListener("touchend", () => keys["ArrowUp"] = false);
 
-/* GAME LOOP */
 function loop() {
 
     if (!gameRunning) return;
 
-    /* reset transform + clear */
     ctx.setTransform(1,0,0,1,0,0);
     ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    /* apply scale */
     ctx.setTransform(scale,0,0,scale,0,0);
 
-    /* CLOUDS */
     for (let c of clouds) {
 
         ctx.fillStyle = "rgba(255,255,255,0.9)";
@@ -237,17 +219,12 @@ function loop() {
         ctx.fill();
 
         c.x -= 0.35;
-
-        if (c.x < -120) {
-            c.x = BASE_W + 120;
-        }
+        if (c.x < -120) c.x = BASE_W + 120;
     }
 
-    /* GROUND */
     ctx.fillStyle = "green";
     ctx.fillRect(0, 350, BASE_W, 50);
 
-    /* MOVEMENT */
     if (keys["ArrowRight"]) player.x += 5;
     if (keys["ArrowLeft"]) player.x -= 5;
 
@@ -265,7 +242,6 @@ function loop() {
         player.onGround = true;
     }
 
-    /* HEARTS */
     hearts.forEach((h, i) => {
 
         ctx.font = "28px Arial";
@@ -278,7 +254,6 @@ function loop() {
         }
     });
 
-    /* SPIKES */
     spikes.forEach(s => {
 
         ctx.font = "30px Arial";
@@ -290,31 +265,79 @@ function loop() {
         }
     });
 
-    /* GIFT */
     ctx.font = "32px Arial";
     ctx.fillText("🎁", goal.x, goal.y);
 
-    /* WIN */
     if (player.x > goal.x && score >= 5) {
         gameRunning = false;
         document.getElementById("message").style.display = "block";
     }
 
-    /* PLAYER */
+    /* 👑 PRINCESS PLAYER (UPDATED ONLY PART) */
+
     let bounce = Math.sin(Date.now() * 0.015) * 2;
+    let legMove = Math.sin(Date.now() * 0.02) * 4;
+    let armMove = Math.sin(Date.now() * 0.02) * 3;
+
+    let px = player.x;
+    let py = player.y + bounce;
+
+    /* DRESS */
     ctx.fillStyle = "#ff69b4";
-    ctx.fillRect(player.x, player.y - 35 + bounce, 24, 35);
+    ctx.beginPath();
+    ctx.moveTo(px + 12, py - 20);
+    ctx.lineTo(px - 10, py + 20);
+    ctx.lineTo(px + 34, py + 20);
+    ctx.fill();
+
+    /* BODY */
+    ctx.fillStyle = "#f5cba7";
+    ctx.fillRect(px + 6, py - 25, 12, 10);
+
+    /* HEAD */
+    ctx.beginPath();
+    ctx.arc(px + 12, py - 35, 10, 0, Math.PI * 2);
+    ctx.fill();
+
+    /* HAIR */
+    ctx.fillStyle = "#5d4037";
+    ctx.beginPath();
+    ctx.arc(px + 12, py - 38, 11, Math.PI, 0);
+    ctx.fill();
+
+    /* ARMS */
+    ctx.strokeStyle = "#f5cba7";
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+    ctx.moveTo(px + 6, py - 20);
+    ctx.lineTo(px - 5, py - 10 + armMove);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(px + 18, py - 20);
+    ctx.lineTo(px + 30, py - 10 - armMove);
+    ctx.stroke();
+
+    /* LEGS */
+    ctx.beginPath();
+    ctx.moveTo(px + 10, py + 20);
+    ctx.lineTo(px + 6 - legMove, py + 35);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(px + 16, py + 20);
+    ctx.lineTo(px + 20 + legMove, py + 35);
+    ctx.stroke();
 
     requestAnimationFrame(loop);
 }
 
-/* RESET */
 function resetGame() {
     init();
     loop();
 }
 
-/* START */
 window.onload = function() {
     initCanvas();
     init();
