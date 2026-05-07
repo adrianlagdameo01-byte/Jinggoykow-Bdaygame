@@ -1,25 +1,25 @@
 <script>
 
-let canvas, ctx;
+window.addEventListener("load", () => {
+
+let canvas = document.getElementById("game");
+let ctx = canvas.getContext("2d");
+
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
+
+/* GAME STATE */
 let player, hearts, spikes, goal, score;
 let gravity = 0.6;
 let keys = {};
 let gameRunning = true;
 let clouds = [];
 
-/* CANVAS */
-function initCanvas() {
-    canvas = document.getElementById("game");
-    ctx = canvas.getContext("2d");
-    resize();
-}
-
-function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-
-/* INIT GAME */
+/* INIT */
 function init() {
 
     player = {
@@ -47,8 +47,7 @@ function init() {
     clouds = [
         {x:100, y:80},
         {x:350, y:120},
-        {x:700, y:60},
-        {x:1050, y:100}
+        {x:700, y:60}
     ];
 
     score = 0;
@@ -59,23 +58,29 @@ function init() {
     document.getElementById("gameover").style.display = "none";
 }
 
-/* INPUT */
+/* SAFE INPUT (NO CRASH) */
 document.addEventListener("keydown", e => keys[e.key] = true);
 document.addEventListener("keyup", e => keys[e.key] = false);
 
-/* TOUCH */
-document.getElementById("left").ontouchstart = () => keys.left = true;
-document.getElementById("left").ontouchend = () => keys.left = false;
+/* SAFE TOUCH CONTROLS */
+function bindTouch(id, key) {
+    const el = document.getElementById(id);
+    if (!el) return;
 
-document.getElementById("right").ontouchstart = () => keys.right = true;
-document.getElementById("right").ontouchend = () => keys.right = false;
+    el.addEventListener("touchstart", e => {
+        e.preventDefault();
+        keys[key] = true;
+    });
 
-document.getElementById("jump").ontouchstart = () => {
-    if (player.onGround) {
-        player.dy = -12;
-        player.onGround = false;
-    }
-};
+    el.addEventListener("touchend", e => {
+        e.preventDefault();
+        keys[key] = false;
+    });
+}
+
+bindTouch("left", "left");
+bindTouch("right", "right");
+bindTouch("jump", "jump");
 
 /* CLOUDS */
 function drawClouds() {
@@ -112,12 +117,7 @@ function drawPlayer() {
     ctx.arc(px + 12, py - 45, 10, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = "#5d4037";
-    ctx.beginPath();
-    ctx.arc(px + 12, py - 48, 11, Math.PI, 0);
-    ctx.fill();
-
-    /* 👣 LEGS (RESTORED) */
+    /* LEGS */
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 2;
 
@@ -150,11 +150,11 @@ function loop() {
     drawClouds();
     drawGround();
 
-    /* MOVEMENT */
+    /* MOVE */
     if (keys["ArrowRight"] || keys.right) player.x += 5;
     if (keys["ArrowLeft"] || keys.left) player.x -= 5;
 
-    if (keys["ArrowUp"] && player.onGround) {
+    if ((keys["ArrowUp"] || keys.jump) && player.onGround) {
         player.dy = -12;
         player.onGround = false;
     }
@@ -177,7 +177,7 @@ function loop() {
         ctx.font = "28px Arial";
         ctx.fillText("❤️", h.x, h.y);
 
-        if (Math.abs(player.x - h.x) < 25 && Math.abs(player.y - h.y) < 25) {
+        if (Math.abs(player.x - h.x) < 25) {
             hearts.splice(i, 1);
             score++;
             document.getElementById("score").innerText = score;
@@ -186,11 +186,10 @@ function loop() {
 
     /* SPIKES */
     spikes.forEach(s => {
-
         ctx.font = "30px Arial";
         ctx.fillText("💀", s.x, s.y);
 
-        if (Math.abs(player.x - s.x) < 25 && Math.abs(player.y - s.y) < 25) {
+        if (Math.abs(player.x - s.x) < 25) {
             gameRunning = false;
             document.getElementById("gameover").style.display = "block";
         }
@@ -210,19 +209,10 @@ function loop() {
     requestAnimationFrame(loop);
 }
 
-/* RESET */
-function resetGame() {
-    init();
-    loop();
-}
-
 /* START */
-window.onload = function () {
-    initCanvas();
-    init();
-    loop();
-};
+init();
+loop();
 
-window.addEventListener("resize", resize);
+});
 
 </script>
