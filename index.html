@@ -2,6 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 <title>For Jinggoykow 💖</title>
 
 <style>
@@ -10,6 +12,7 @@ body {
     overflow: hidden;
     background: linear-gradient(#87CEEB, #ffffff);
     font-family: Arial;
+    touch-action: none;
 }
 
 canvas {
@@ -20,7 +23,7 @@ canvas {
     position: absolute;
     top: 10px;
     left: 10px;
-    font-size: 22px;
+    font-size: 18px;
     font-weight: bold;
     color: white;
     text-shadow: 2px 2px 4px black;
@@ -36,8 +39,8 @@ canvas {
     background: white;
     padding: 20px;
     border-radius: 20px;
-    max-width: 700px;
     width: 85%;
+    max-width: 700px;
     text-align: center;
     max-height: 70vh;
     overflow-y: auto;
@@ -54,6 +57,28 @@ button {
     color: white;
     cursor: pointer;
 }
+
+/* MOBILE CONTROLS */
+#controls {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    z-index: 15;
+}
+
+.ctrl {
+    width: 70px;
+    height: 70px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 50%;
+    font-size: 22px;
+    text-align: center;
+    line-height: 70px;
+    user-select: none;
+}
 </style>
 </head>
 
@@ -63,33 +88,24 @@ button {
 
 <canvas id="game"></canvas>
 
+<!-- MOBILE CONTROLS -->
+<div id="controls">
+    <div class="ctrl" id="left">⬅️</div>
+    <div class="ctrl" id="jump">⬆️</div>
+    <div class="ctrl" id="right">➡️</div>
+</div>
+
 <div id="message">
 <h2>🎉 You unlocked your surprise 💖</h2>
-
-<p style="line-height:1.6;">
-✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎉🎂🎈🎊🎁🍾🪅🪩 ✨✨✨
+<p>
+✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎂✨✨✨
 <br><br>
-
-Tanda mo naaaaaa! Char lang 🤭 But seriously, I really wish I could spend this whole day with you, especially ngayon na birthday mo.
-<br><br>
-
-Aside from good health and more blessings sa work, I’m always praying for your safety and genuine happiness. May God continue to give you wisdom as you lead His church and ministry.
-<br><br>
-
-I know lately hindi tayo masyadong nagkakausap, and I take responsibility for that.
-<br><br>
-
-But one thing’s for sure—hihintayin kita.
-Kasi mahal na mahal kita, Jinggoykow. ❤️
-<br><br>
-
-—Maximow 🥰
+Mahal na mahal kita ❤️
 </p>
-
 </div>
 
 <div id="gameover">
-<h2>💀 Ouch! Try Again 😅</h2>
+<h2>💀 Try Again 😅</h2>
 <button onclick="resetGame()">Try Again</button>
 </div>
 
@@ -101,52 +117,50 @@ let gravity = 0.6;
 let keys = {};
 let gameRunning = true;
 
-let clouds = [];
+let groundY;
 
-/* INIT */
+/* INIT CANVAS */
 function initCanvas() {
-
     canvas = document.getElementById("game");
     ctx = canvas.getContext("2d");
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
 }
 
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    groundY = canvas.height - 100;
+}
+
+/* INIT GAME */
 function init() {
 
     player = {
         x: 50,
-        y: 300,
+        y: groundY,
         dy: 0,
         onGround: false
     };
 
     hearts = [
-        {x:200, y:300},
-        {x:400, y:250},
-        {x:600, y:300},
-        {x:800, y:220},
-        {x:1000, y:300}
+        {x:200, y:groundY},
+        {x:400, y:groundY-50},
+        {x:600, y:groundY},
+        {x:800, y:groundY-80},
+        {x:1000, y:groundY}
     ];
 
     spikes = [
-        {x:500, y:330},
-        {x:900, y:330}
+        {x:500, y:groundY},
+        {x:900, y:groundY}
     ];
 
     goal = {
         x:1200,
-        y:300
+        y:groundY
     };
-
-    clouds = [
-        {x:100, y:80},
-        {x:350, y:120},
-        {x:700, y:60},
-        {x:1050, y:100},
-        {x:1400, y:70}
-    ];
 
     score = 0;
     gameRunning = true;
@@ -156,177 +170,97 @@ function init() {
     document.getElementById("gameover").style.display = "none";
 }
 
-/* INPUT */
-document.addEventListener("keydown", e => {
-    keys[e.key] = true;
-});
+/* INPUT (KEYBOARD) */
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
 
-document.addEventListener("keyup", e => {
-    keys[e.key] = false;
-});
+/* TOUCH CONTROLS */
+document.getElementById("left").ontouchstart = () => keys["ArrowLeft"] = true;
+document.getElementById("left").ontouchend = () => keys["ArrowLeft"] = false;
 
-/* CLOUDS */
-function drawClouds() {
+document.getElementById("right").ontouchstart = () => keys["ArrowRight"] = true;
+document.getElementById("right").ontouchend = () => keys["ArrowRight"] = false;
 
-    for (let c of clouds) {
-
-        ctx.fillStyle = "rgba(255,255,255,0.9)";
-
-        ctx.beginPath();
-        ctx.arc(c.x, c.y, 25, 0, Math.PI * 2);
-        ctx.arc(c.x + 25, c.y + 10, 30, 0, Math.PI * 2);
-        ctx.arc(c.x + 55, c.y, 25, 0, Math.PI * 2);
-        ctx.arc(c.x + 25, c.y - 10, 22, 0, Math.PI * 2);
-        ctx.fill();
-
-        c.x -= 0.35;
-
-        if (c.x < -120) {
-            c.x = canvas.width + 120;
-            c.y = 40 + Math.random() * 120;
-        }
+document.getElementById("jump").ontouchstart = () => {
+    if (player.onGround) {
+        player.dy = -12;
+        player.onGround = false;
     }
-}
+};
 
-/* PLAYER */
+/* DRAW PLAYER */
 function drawPlayer() {
 
-    let bounce = Math.sin(Date.now() * 0.015) * 2;
-
-    // body
     ctx.fillStyle = "#ff69b4";
-    ctx.fillRect(player.x, player.y - 35 + bounce, 24, 35);
+    ctx.fillRect(player.x, player.y - 35, 24, 35);
 
-    // face
     ctx.fillStyle = "#f5cba7";
     ctx.beginPath();
-    ctx.arc(player.x + 12, player.y - 45 + bounce, 10, 0, Math.PI * 2);
+    ctx.arc(player.x + 12, player.y - 45, 10, 0, Math.PI * 2);
     ctx.fill();
-
-    // hair
-    ctx.fillStyle = "#5d4037";
-    ctx.beginPath();
-    ctx.arc(player.x + 12, player.y - 48 + bounce, 11, Math.PI, 0);
-    ctx.fill();
-
-    // skirt
-    ctx.fillStyle = "#ff1493";
-    ctx.beginPath();
-    ctx.moveTo(player.x + 2, player.y - 5 + bounce);
-    ctx.lineTo(player.x + 22, player.y - 5 + bounce);
-    ctx.lineTo(player.x + 12, player.y + 8 + bounce);
-    ctx.fill();
-
-    // moving legs
-    ctx.strokeStyle = "#000";
-    ctx.lineWidth = 2;
-
-    let legMove = Math.sin(Date.now() * 0.02) * 4;
-
-    ctx.beginPath();
-    ctx.moveTo(player.x + 8, player.y + bounce);
-    ctx.lineTo(player.x + 8 - legMove, player.y + 15 + bounce);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(player.x + 16, player.y + bounce);
-    ctx.lineTo(player.x + 16 + legMove, player.y + 15 + bounce);
-    ctx.stroke();
-
-    // arms
-    ctx.beginPath();
-    ctx.moveTo(player.x + 2, player.y - 20 + bounce);
-    ctx.lineTo(player.x - 8, player.y - 10 + bounce);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(player.x + 22, player.y - 20 + bounce);
-    ctx.lineTo(player.x + 32, player.y - 10 + bounce);
-    ctx.stroke();
 }
 
 /* GROUND */
 function drawGround() {
-
     ctx.fillStyle = "green";
-    ctx.fillRect(0, 350, canvas.width, 50);
+    ctx.fillRect(0, groundY, canvas.width, 100);
 }
 
-/* GAME LOOP */
+/* LOOP */
 function loop() {
 
     if (!gameRunning) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    drawClouds();
     drawGround();
 
-    /* MOVEMENT */
-    if (keys["ArrowRight"]) {
-        player.x += 5;
-    }
-
-    if (keys["ArrowLeft"]) {
-        player.x -= 5;
-    }
+    /* movement */
+    if (keys["ArrowRight"]) player.x += 5;
+    if (keys["ArrowLeft"]) player.x -= 5;
 
     if (keys["ArrowUp"] && player.onGround) {
         player.dy = -12;
         player.onGround = false;
     }
 
-    /* GRAVITY */
+    /* gravity */
     player.dy += gravity;
     player.y += player.dy;
 
-    if (player.y >= 320) {
-        player.y = 320;
+    if (player.y >= groundY) {
+        player.y = groundY;
         player.dy = 0;
         player.onGround = true;
     }
 
-    /* HEARTS */
+    /* hearts */
     hearts.forEach((h, i) => {
-
         ctx.font = "28px Arial";
         ctx.fillText("❤️", h.x, h.y);
 
-        if (
-            Math.abs(player.x - h.x) < 25 &&
-            Math.abs(player.y - h.y) < 25
-        ) {
+        if (Math.abs(player.x - h.x) < 25 && Math.abs(player.y - h.y) < 25) {
             hearts.splice(i, 1);
             score++;
-
             document.getElementById("score").innerText = score;
         }
     });
 
-    /* SPIKES */
+    /* spikes */
     spikes.forEach(s => {
-
-        ctx.font = "30px Arial";
         ctx.fillText("💀", s.x, s.y);
 
-        if (
-            Math.abs(player.x - s.x) < 25 &&
-            Math.abs(player.y - s.y) < 25
-        ) {
+        if (Math.abs(player.x - s.x) < 25 && Math.abs(player.y - s.y) < 25) {
             gameRunning = false;
             document.getElementById("gameover").style.display = "block";
         }
     });
 
-    /* GIFT */
-    ctx.font = "32px Arial";
+    /* goal */
     ctx.fillText("🎁", goal.x, goal.y);
 
-    /* WIN */
     if (player.x > goal.x && score >= 5) {
-
         gameRunning = false;
-
         document.getElementById("message").style.display = "block";
     }
 
@@ -337,14 +271,12 @@ function loop() {
 
 /* RESET */
 function resetGame() {
-
     init();
     loop();
 }
 
 /* START */
 window.onload = function() {
-
     initCanvas();
     init();
     loop();
