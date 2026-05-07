@@ -243,7 +243,6 @@ function loop() {
     }
 
     hearts.forEach((h, i) => {
-
         ctx.font = "28px Arial";
         ctx.fillText("❤️", h.x, h.y);
 
@@ -255,7 +254,6 @@ function loop() {
     });
 
     spikes.forEach(s => {
-
         ctx.font = "30px Arial";
         ctx.fillText("💀", s.x, s.y);
 
@@ -273,36 +271,69 @@ function loop() {
         document.getElementById("message").style.display = "block";
     }
 
-    /* 👑 PRINCESS PLAYER (UPDATED ONLY PART) */
+    /* 👑 VIDEO GAME PRINCESS (LONG HAIR UPGRADE) */
 
     let bounce = Math.sin(Date.now() * 0.015) * 2;
     let legMove = Math.sin(Date.now() * 0.02) * 4;
     let armMove = Math.sin(Date.now() * 0.02) * 3;
+    let hairWave = Math.sin(Date.now() * 0.01) * 4;
 
     let px = player.x;
     let py = player.y + bounce;
 
-    /* DRESS */
-    ctx.fillStyle = "#ff69b4";
+    /* ===== LONG FLOWING HAIR ===== */
+    ctx.fillStyle = "#3b2a1f";
+
+    ctx.beginPath();
+    ctx.moveTo(px + 12, py - 50);
+    ctx.quadraticCurveTo(px - 25 + hairWave, py - 20, px - 15, py + 30);
+    ctx.quadraticCurveTo(px + 12, py + 45, px + 35, py + 10);
+    ctx.quadraticCurveTo(px + 30 - hairWave, py - 15, px + 12, py - 50);
+    ctx.fill();
+
+    /* side strands */
+    ctx.beginPath();
+    ctx.moveTo(px + 2, py - 45);
+    ctx.quadraticCurveTo(px - 20, py - 10, px - 8, py + 25);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(px + 22, py - 45);
+    ctx.quadraticCurveTo(px + 45, py - 10, px + 32, py + 25);
+    ctx.fill();
+
+    /* ===== DRESS (game styled) ===== */
+    ctx.fillStyle = "#ff4fa3";
     ctx.beginPath();
     ctx.moveTo(px + 12, py - 20);
-    ctx.lineTo(px - 10, py + 20);
-    ctx.lineTo(px + 34, py + 20);
+    ctx.lineTo(px - 18, py + 25);
+    ctx.lineTo(px + 42, py + 25);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = "#ff2f8f";
+    ctx.beginPath();
+    ctx.moveTo(px + 12, py - 20);
+    ctx.lineTo(px + 2, py + 25);
+    ctx.lineTo(px + 22, py + 25);
+    ctx.closePath();
     ctx.fill();
 
     /* BODY */
     ctx.fillStyle = "#f5cba7";
-    ctx.fillRect(px + 6, py - 25, 12, 10);
+    ctx.fillRect(px + 6, py - 30, 12, 12);
 
     /* HEAD */
+    ctx.fillStyle = "#f5cba7";
     ctx.beginPath();
-    ctx.arc(px + 12, py - 35, 10, 0, Math.PI * 2);
+    ctx.arc(px + 12, py - 45, 12, 0, Math.PI * 2);
     ctx.fill();
 
-    /* HAIR */
-    ctx.fillStyle = "#5d4037";
+    /* eyes */
+    ctx.fillStyle = "#000";
     ctx.beginPath();
-    ctx.arc(px + 12, py - 38, 11, Math.PI, 0);
+    ctx.arc(px + 8, py - 47, 2, 0, Math.PI * 2);
+    ctx.arc(px + 16, py - 47, 2, 0, Math.PI * 2);
     ctx.fill();
 
     /* ARMS */
@@ -310,25 +341,31 @@ function loop() {
     ctx.lineWidth = 2;
 
     ctx.beginPath();
-    ctx.moveTo(px + 6, py - 20);
-    ctx.lineTo(px - 5, py - 10 + armMove);
+    ctx.moveTo(px + 6, py - 22);
+    ctx.lineTo(px - 10, py - 12 + armMove);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(px + 18, py - 20);
-    ctx.lineTo(px + 30, py - 10 - armMove);
+    ctx.moveTo(px + 18, py - 22);
+    ctx.lineTo(px + 34, py - 12 - armMove);
     ctx.stroke();
 
     /* LEGS */
     ctx.beginPath();
-    ctx.moveTo(px + 10, py + 20);
-    ctx.lineTo(px + 6 - legMove, py + 35);
+    ctx.moveTo(px + 10, py + 25);
+    ctx.lineTo(px + 6 - legMove, py + 42);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(px + 16, py + 20);
-    ctx.lineTo(px + 20 + legMove, py + 35);
+    ctx.moveTo(px + 16, py + 25);
+    ctx.lineTo(px + 20 + legMove, py + 42);
     ctx.stroke();
+
+    /* SHADOW */
+    ctx.fillStyle = "rgba(0,0,0,0.15)";
+    ctx.beginPath();
+    ctx.ellipse(px + 12, py + 45, 18, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
 
     requestAnimationFrame(loop);
 }
