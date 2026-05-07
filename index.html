@@ -100,6 +100,8 @@ Tanda mo naaaaaa! Char lang 🤭
 <br><br>
 —Maximow 🥰
 </p>
+<br>
+<button onclick="resetGame()">🔁 Play Again</button>
 </div>
 
 <div id="gameover">
@@ -219,12 +221,12 @@ function loop() {
         if (c.x < -150) c.x = BASE_W + 200;
     }
 
-    /* BIRDS (unchanged) */
+    /* BIRDS */
     for (let b of birds) {
+
         let flap = Math.sin(Date.now()*0.02 + b.f) * 6;
 
         ctx.fillStyle = "#222";
-
         ctx.beginPath();
         ctx.ellipse(b.x, b.y, 6, 3, 0, 0, Math.PI*2);
         ctx.fill();
@@ -271,23 +273,17 @@ function loop() {
         player.onGround = true;
     }
 
-    /* DOG (unchanged) */
+    /* DOG */
     dog.x += (player.x - dog.x - 30) * 0.05;
     dog.y = 320;
 
-    dog.leg = Math.sin(Date.now()*0.02)*3;
-    dog.tail = Math.sin(Date.now()*0.04)*6;
-
-    let dx = dog.x;
-    let dy = dog.y;
-
     ctx.fillStyle = "#d9d9d9";
     ctx.beginPath();
-    ctx.ellipse(dx, dy, 12, 8, 0, 0, Math.PI*2);
+    ctx.ellipse(dog.x, dog.y, 12, 8, 0, 0, Math.PI*2);
     ctx.fill();
 
     ctx.beginPath();
-    ctx.arc(dx + 10, dy - 5, 6, 0, Math.PI*2);
+    ctx.arc(dog.x + 10, dog.y - 5, 6, 0, Math.PI*2);
     ctx.fill();
 
     /* HEARTS */
@@ -302,22 +298,20 @@ function loop() {
         }
     });
 
-    /* SPIKES */
+    /* SPIKES FIXED COLLISION */
     spikes.forEach(s => {
+        ctx.font = "30px Arial";
+        ctx.fillText("💀", s.x, s.y);
 
-    ctx.font = "30px Arial";
-    ctx.fillText("💀", s.x, s.y);
+        let dx = player.x - s.x;
+        let dy = player.y - s.y;
+        let distance = Math.sqrt(dx*dx + dy*dy);
 
-    let dx = player.x - s.x;
-    let dy = player.y - s.y;
-
-    let distance = Math.sqrt(dx*dx + dy*dy);
-
-    if (distance < 35) {
-        gameRunning = false;
-        document.getElementById("gameover").style.display = "block";
-    }
-   });
+        if (distance < 30) {
+            gameRunning = false;
+            document.getElementById("gameover").style.display = "block";
+        }
+    });
 
     ctx.font = "32px Arial";
     ctx.fillText("🎁", goal.x, goal.y);
@@ -327,8 +321,7 @@ function loop() {
         document.getElementById("message").style.display = "block";
     }
 
-    /* 👑 PRINCESS (RESTORED MOVEMENT + GLASSES + SHOES) */
-
+    /* PRINCESS */
     let bounce = Math.sin(Date.now()*0.015)*2;
     let legMove = Math.sin(Date.now()*0.02)*4;
     let armMove = Math.sin(Date.now()*0.02)*3;
@@ -337,7 +330,6 @@ function loop() {
     let px = player.x;
     let py = player.y + bounce;
 
-    /* HAIR */
     ctx.fillStyle = "#3b2a1f";
     ctx.beginPath();
     ctx.moveTo(px+12, py-50);
@@ -345,7 +337,6 @@ function loop() {
     ctx.quadraticCurveTo(px+12, py+50, px+35, py+10);
     ctx.fill();
 
-    /* DRESS */
     ctx.fillStyle = "#ff4fa3";
     ctx.beginPath();
     ctx.moveTo(px+12, py-20);
@@ -353,16 +344,13 @@ function loop() {
     ctx.lineTo(px+45, py+30);
     ctx.fill();
 
-    /* BODY */
     ctx.fillStyle = "#f5cba7";
     ctx.fillRect(px+6, py-30, 12, 12);
 
-    /* HEAD */
     ctx.beginPath();
     ctx.arc(px+12, py-45, 12, 0, Math.PI*2);
     ctx.fill();
 
-    /* GLASSES */
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -372,21 +360,6 @@ function loop() {
     ctx.arc(px+16, py-45, 4, 0, Math.PI*2);
     ctx.stroke();
 
-    /* ARMS */
-    ctx.strokeStyle = "#f5cba7";
-    ctx.lineWidth = 5;
-
-    ctx.beginPath();
-    ctx.moveTo(px+6, py-22);
-    ctx.lineTo(px-12, py-10+armMove);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(px+18, py-22);
-    ctx.lineTo(px+36, py-10-armMove);
-    ctx.stroke();
-
-    /* LEGS */
     ctx.lineWidth = 3;
 
     ctx.beginPath();
@@ -398,11 +371,6 @@ function loop() {
     ctx.moveTo(px+16, py+25);
     ctx.lineTo(px+20+legMove, py+42);
     ctx.stroke();
-
-    /* SHOES */
-    ctx.fillStyle = "#333";
-    ctx.fillRect(px+2-legMove, py+42, 8, 4);
-    ctx.fillRect(px+16+legMove, py+42, 8, 4);
 
     requestAnimationFrame(loop);
 }
