@@ -7,70 +7,48 @@ let keys = {};
 let gameRunning = true;
 let clouds = [];
 
-/* WORLD SCALE SYSTEM */
-let scale = 1;
-let baseWidth = 1400;
-let baseHeight = 450;
-
-/* INIT CANVAS */
+/* CANVAS */
 function initCanvas() {
     canvas = document.getElementById("game");
     ctx = canvas.getContext("2d");
     resize();
 }
 
-/* RESPONSIVE + SCALE FIX */
 function resize() {
-
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-
-    // scale based on width (mobile-friendly)
-    scale = canvas.width / baseWidth;
-
-    if (scale < 0.6) scale = 0.6; // prevent too small
-    if (scale > 1) scale = 1;
-}
-
-/* SCALE HELPER */
-function S(v) {
-    return v * scale;
 }
 
 /* INIT GAME */
 function init() {
 
     player = {
-        x: S(50),
-        y: S(300),
+        x: 50,
+        y: canvas.height - 100,
         dy: 0,
         onGround: false
     };
 
     hearts = [
-        {x:S(200), y:S(300)},
-        {x:S(400), y:S(250)},
-        {x:S(600), y:S(300)},
-        {x:S(800), y:S(220)},
-        {x:S(1000), y:S(300)}
+        {x:200, y:300},
+        {x:400, y:250},
+        {x:600, y:300},
+        {x:800, y:220},
+        {x:1000, y:300}
     ];
 
     spikes = [
-        {x:S(500), y:S(330)},
-        {x:S(900), y:S(330)}
+        {x:500, y:330},
+        {x:900, y:330}
     ];
 
-    goal = {
-        x:S(1200),
-        y:S(300)
-    };
+    goal = { x:1200, y:300 };
 
     clouds = [
-        {x:S(100), y:S(80)},
-        {x:S(350), y:S(120)},
-        {x:S(700), y:S(60)},
-        {x:S(1050), y:S(100)},
-        {x:S(1400), y:S(70)}
+        {x:100, y:80},
+        {x:350, y:120},
+        {x:700, y:60},
+        {x:1050, y:100}
     ];
 
     score = 0;
@@ -81,110 +59,85 @@ function init() {
     document.getElementById("gameover").style.display = "none";
 }
 
-/* TOUCH CONTROLS */
-document.getElementById("left").ontouchstart = () => keys["left"] = true;
-document.getElementById("left").ontouchend = () => keys["left"] = false;
+/* INPUT */
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
 
-document.getElementById("right").ontouchstart = () => keys["right"] = true;
-document.getElementById("right").ontouchend = () => keys["right"] = false;
+/* TOUCH */
+document.getElementById("left").ontouchstart = () => keys.left = true;
+document.getElementById("left").ontouchend = () => keys.left = false;
+
+document.getElementById("right").ontouchstart = () => keys.right = true;
+document.getElementById("right").ontouchend = () => keys.right = false;
 
 document.getElementById("jump").ontouchstart = () => {
     if (player.onGround) {
-        player.dy = -12 * scale;
+        player.dy = -12;
         player.onGround = false;
     }
 };
 
-/* KEYBOARD */
-document.addEventListener("keydown", e => keys[e.key] = true);
-document.addEventListener("keyup", e => keys[e.key] = false);
-
 /* CLOUDS */
 function drawClouds() {
-
     for (let c of clouds) {
 
         ctx.fillStyle = "rgba(255,255,255,0.9)";
-
         ctx.beginPath();
-        ctx.arc(c.x, c.y, S(25), 0, Math.PI * 2);
-        ctx.arc(c.x + S(25), c.y + S(10), S(30), 0, Math.PI * 2);
-        ctx.arc(c.x + S(55), c.y, S(25), 0, Math.PI * 2);
-        ctx.arc(c.x + S(25), c.y - S(10), S(22), 0, Math.PI * 2);
+        ctx.arc(c.x, c.y, 25, 0, Math.PI * 2);
+        ctx.arc(c.x + 25, c.y + 10, 30, 0, Math.PI * 2);
+        ctx.arc(c.x + 55, c.y, 25, 0, Math.PI * 2);
         ctx.fill();
 
-        c.x -= 0.35 * scale;
+        c.x -= 0.3;
 
-        if (c.x < -200) {
-            c.x = canvas.width + 200;
+        if (c.x < -100) {
+            c.x = canvas.width + 100;
         }
     }
 }
 
-/* PLAYER (FIXED + LEG ANIMATION RESTORED) */
+/* PLAYER (LEG FIXED) */
 function drawPlayer() {
 
-    let bounce = Math.sin(Date.now() * 0.015) * S(2);
+    let bounce = Math.sin(Date.now() * 0.015) * 2;
 
     let px = player.x;
     let py = player.y + bounce;
 
-    // BODY
     ctx.fillStyle = "#ff69b4";
-    ctx.fillRect(px, py - S(35), S(24), S(35));
+    ctx.fillRect(px, py - 35, 24, 35);
 
-    // HEAD
     ctx.fillStyle = "#f5cba7";
     ctx.beginPath();
-    ctx.arc(px + S(12), py - S(45), S(10), 0, Math.PI * 2);
+    ctx.arc(px + 12, py - 45, 10, 0, Math.PI * 2);
     ctx.fill();
 
-    // HAIR
     ctx.fillStyle = "#5d4037";
     ctx.beginPath();
-    ctx.arc(px + S(12), py - S(48), S(11), Math.PI, 0);
+    ctx.arc(px + 12, py - 48, 11, Math.PI, 0);
     ctx.fill();
 
-    // SKIRT
-    ctx.fillStyle = "#ff1493";
-    ctx.beginPath();
-    ctx.moveTo(px + S(2), py - S(5));
-    ctx.lineTo(px + S(22), py - S(5));
-    ctx.lineTo(px + S(12), py + S(8));
-    ctx.fill();
-
-    /* 👣 MOVING LEGS (RESTORED + FIXED SCALE) */
+    /* 👣 LEGS (RESTORED) */
     ctx.strokeStyle = "#000";
-    ctx.lineWidth = S(2);
+    ctx.lineWidth = 2;
 
-    let legMove = Math.sin(Date.now() * 0.02) * S(4);
+    let legMove = Math.sin(Date.now() * 0.02) * 4;
 
     ctx.beginPath();
-    ctx.moveTo(px + S(8), py);
-    ctx.lineTo(px + S(8) - legMove, py + S(15));
+    ctx.moveTo(px + 8, py);
+    ctx.lineTo(px + 8 - legMove, py + 15);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(px + S(16), py);
-    ctx.lineTo(px + S(16) + legMove, py + S(15));
-    ctx.stroke();
-
-    // ARMS
-    ctx.beginPath();
-    ctx.moveTo(px + S(2), py - S(20));
-    ctx.lineTo(px - S(8), py - S(10));
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(px + S(22), py - S(20));
-    ctx.lineTo(px + S(32), py - S(10));
+    ctx.moveTo(px + 16, py);
+    ctx.lineTo(px + 16 + legMove, py + 15);
     ctx.stroke();
 }
 
 /* GROUND */
 function drawGround() {
     ctx.fillStyle = "green";
-    ctx.fillRect(0, canvas.height - S(50), canvas.width, S(50));
+    ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
 }
 
 /* LOOP */
@@ -198,22 +151,22 @@ function loop() {
     drawGround();
 
     /* MOVEMENT */
-    if (keys["ArrowRight"] || keys["right"]) player.x += 5 * scale;
-    if (keys["ArrowLeft"] || keys["left"]) player.x -= 5 * scale;
+    if (keys["ArrowRight"] || keys.right) player.x += 5;
+    if (keys["ArrowLeft"] || keys.left) player.x -= 5;
 
     if (keys["ArrowUp"] && player.onGround) {
-        player.dy = -12 * scale;
+        player.dy = -12;
         player.onGround = false;
     }
 
     /* GRAVITY */
-    player.dy += gravity * scale;
+    player.dy += gravity;
     player.y += player.dy;
 
-    let groundY = canvas.height - S(50);
+    let groundY = canvas.height - 50;
 
-    if (player.y >= groundY - S(30)) {
-        player.y = groundY - S(30);
+    if (player.y >= groundY - 30) {
+        player.y = groundY - 30;
         player.dy = 0;
         player.onGround = true;
     }
@@ -221,10 +174,10 @@ function loop() {
     /* HEARTS */
     hearts.forEach((h, i) => {
 
-        ctx.font = `${S(28)}px Arial`;
+        ctx.font = "28px Arial";
         ctx.fillText("❤️", h.x, h.y);
 
-        if (Math.abs(player.x - h.x) < S(25) && Math.abs(player.y - h.y) < S(25)) {
+        if (Math.abs(player.x - h.x) < 25 && Math.abs(player.y - h.y) < 25) {
             hearts.splice(i, 1);
             score++;
             document.getElementById("score").innerText = score;
@@ -234,17 +187,17 @@ function loop() {
     /* SPIKES */
     spikes.forEach(s => {
 
-        ctx.font = `${S(30)}px Arial`;
+        ctx.font = "30px Arial";
         ctx.fillText("💀", s.x, s.y);
 
-        if (Math.abs(player.x - s.x) < S(25) && Math.abs(player.y - s.y) < S(25)) {
+        if (Math.abs(player.x - s.x) < 25 && Math.abs(player.y - s.y) < 25) {
             gameRunning = false;
             document.getElementById("gameover").style.display = "block";
         }
     });
 
     /* GIFT */
-    ctx.font = `${S(32)}px Arial`;
+    ctx.font = "32px Arial";
     ctx.fillText("🎁", goal.x, goal.y);
 
     /* WIN */
@@ -264,15 +217,12 @@ function resetGame() {
 }
 
 /* START */
-window.onload = function() {
+window.onload = function () {
     initCanvas();
     init();
     loop();
 };
 
-window.addEventListener("resize", () => {
-    resize();
-    init();
-});
+window.addEventListener("resize", resize);
 
 </script>
