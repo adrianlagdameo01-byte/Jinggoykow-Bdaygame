@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <title>For Jinggoykow 💖</title>
-    
+
 <style>
 body {
     margin: 0;
     overflow: hidden;
-    background: linear-gradient(#87CEEB, #fff);
+    background: linear-gradient(#87CEEB, #ffffff);
     font-family: Arial;
 }
 
@@ -20,7 +20,11 @@ canvas {
     position: absolute;
     top: 10px;
     left: 10px;
-    font-size: 18px;
+    font-size: 22px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 4px black;
+    z-index: 10;
 }
 
 #message, #gameover {
@@ -31,46 +35,57 @@ canvas {
     transform: translateX(-50%);
     background: white;
     padding: 20px;
-    border-radius: 15px;
-    max-width: 650px;
+    border-radius: 20px;
+    max-width: 700px;
+    width: 85%;
     text-align: center;
     max-height: 70vh;
     overflow-y: auto;
-    z-index: 10;
+    z-index: 20;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
 }
 
 button {
-    padding: 10px 20px;
+    padding: 12px 22px;
     font-size: 16px;
-    margin-top: 10px;
+    border: none;
+    border-radius: 10px;
+    background: hotpink;
+    color: white;
+    cursor: pointer;
 }
 </style>
 </head>
 
 <body>
 
-<div id="ui">Hearts: <span id="score">0</span> / 5</div>
+<div id="ui">❤️ Hearts: <span id="score">0</span> / 5</div>
 
 <canvas id="game"></canvas>
 
 <div id="message">
 <h2>🎉 You unlocked your surprise 💖</h2>
-<p>
+
+<p style="line-height:1.6;">
 ✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎉🎂🎈🎊🎁🍾🪅🪩 ✨✨✨
+<br><br>
 
 Tanda mo naaaaaa! Char lang 🤭 But seriously, I really wish I could spend this whole day with you, especially ngayon na birthday mo.
+<br><br>
 
-Aside from good health and more blessings sa work, I’m always praying for your safety and genuine happiness. May God continue to give you wisdom as you lead His church and ministry. I also believe that in His perfect time, makikilala rin Siya nila Tito at ng mga kapatid mo. And I’m really hoping matuloy na yung Shopee business mo—kaya mo ‘yan. Lakasan mo lang loob mo, stay wise, and keep praying. Lagi kitang isasama sa prayers ko, and I’ll always support you, okay?
+Aside from good health and more blessings sa work, I’m always praying for your safety and genuine happiness. May God continue to give you wisdom as you lead His church and ministry.
+<br><br>
 
-I know lately hindi tayo masyadong nagkakausap, and I take responsibility for that. I get overwhelmed by our situation, and minsan kinakain ako ng negative thoughts—especially ngayon na wala pa ring response si Titaz. I tried to distract myself with work, pero nasobrahan na… to the point na napapabayaan ko na pati church and ikaw. And I truly regret that.
-
-You have no idea how much I want things to be okay for us.
+I know lately hindi tayo masyadong nagkakausap, and I take responsibility for that.
+<br><br>
 
 But one thing’s for sure—hihintayin kita.
 Kasi mahal na mahal kita, Jinggoykow. ❤️
+<br><br>
 
 —Maximow 🥰
 </p>
+
 </div>
 
 <div id="gameover">
@@ -79,17 +94,18 @@ Kasi mahal na mahal kita, Jinggoykow. ❤️
 </div>
 
 <script>
+
 let canvas, ctx;
 let player, hearts, spikes, goal, score;
 let gravity = 0.6;
 let keys = {};
 let gameRunning = true;
 
-/* ☁️ CLOUDS */
 let clouds = [];
 
-/* INIT CANVAS */
+/* INIT */
 function initCanvas() {
+
     canvas = document.getElementById("game");
     ctx = canvas.getContext("2d");
 
@@ -98,53 +114,64 @@ function initCanvas() {
 }
 
 function init() {
-    player = { x: 50, y: 300, dy: 0, onGround: false };
+
+    player = {
+        x: 50,
+        y: 300,
+        dy: 0,
+        onGround: false
+    };
 
     hearts = [
-        {x: 200, y: 300},
-        {x: 400, y: 250},
-        {x: 600, y: 300},
-        {x: 800, y: 200},
-        {x: 1000, y: 300}
+        {x:200, y:300},
+        {x:400, y:250},
+        {x:600, y:300},
+        {x:800, y:220},
+        {x:1000, y:300}
     ];
 
     spikes = [
-        {x: 500, y: 330},
-        {x: 900, y: 330}
+        {x:500, y:330},
+        {x:900, y:330}
     ];
 
-    goal = { x: 1200, y: 300 };
+    goal = {
+        x:1200,
+        y:300
+    };
+
+    clouds = [
+        {x:100, y:80},
+        {x:350, y:120},
+        {x:700, y:60},
+        {x:1050, y:100},
+        {x:1400, y:70}
+    ];
 
     score = 0;
     gameRunning = true;
 
     document.getElementById("score").innerText = score;
-    document.getElementById("gameover").style.display = "none";
     document.getElementById("message").style.display = "none";
-
-   /* ☁️ CLOUD INIT */
-clouds = [
-    {x:100,y:80},
-    {x:350,y:120},
-    {x:700,y:60},
-    {x:1050,y:100},
-    {x:1400,y:70}
-];
+    document.getElementById("gameover").style.display = "none";
 }
 
 /* INPUT */
-document.addEventListener("keydown", e => keys[e.key] = true);
-document.addEventListener("keyup", e => keys[e.key] = false);
+document.addEventListener("keydown", e => {
+    keys[e.key] = true;
+});
 
-<script>
-/* ☁️ DRAW CLOUDS */
+document.addEventListener("keyup", e => {
+    keys[e.key] = false;
+});
+
+/* CLOUDS */
 function drawClouds() {
 
     for (let c of clouds) {
 
         ctx.fillStyle = "rgba(255,255,255,0.9)";
 
-        // main cloud
         ctx.beginPath();
         ctx.arc(c.x, c.y, 25, 0, Math.PI * 2);
         ctx.arc(c.x + 25, c.y + 10, 30, 0, Math.PI * 2);
@@ -152,46 +179,104 @@ function drawClouds() {
         ctx.arc(c.x + 25, c.y - 10, 22, 0, Math.PI * 2);
         ctx.fill();
 
-        // smooth movement
         c.x -= 0.35;
 
-        // reset when off screen
         if (c.x < -120) {
             c.x = canvas.width + 120;
             c.y = 40 + Math.random() * 120;
         }
     }
 }
-</script>
 
 /* PLAYER */
 function drawPlayer() {
-    ctx.font = "30px Arial";
-    ctx.fillText("👩", player.x, player.y);
+
+    let bounce = Math.sin(Date.now() * 0.015) * 2;
+
+    // body
+    ctx.fillStyle = "#ff69b4";
+    ctx.fillRect(player.x, player.y - 35 + bounce, 24, 35);
+
+    // face
+    ctx.fillStyle = "#f5cba7";
+    ctx.beginPath();
+    ctx.arc(player.x + 12, player.y - 45 + bounce, 10, 0, Math.PI * 2);
+    ctx.fill();
+
+    // hair
+    ctx.fillStyle = "#5d4037";
+    ctx.beginPath();
+    ctx.arc(player.x + 12, player.y - 48 + bounce, 11, Math.PI, 0);
+    ctx.fill();
+
+    // skirt
+    ctx.fillStyle = "#ff1493";
+    ctx.beginPath();
+    ctx.moveTo(player.x + 2, player.y - 5 + bounce);
+    ctx.lineTo(player.x + 22, player.y - 5 + bounce);
+    ctx.lineTo(player.x + 12, player.y + 8 + bounce);
+    ctx.fill();
+
+    // moving legs
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 2;
+
+    let legMove = Math.sin(Date.now() * 0.02) * 4;
+
+    ctx.beginPath();
+    ctx.moveTo(player.x + 8, player.y + bounce);
+    ctx.lineTo(player.x + 8 - legMove, player.y + 15 + bounce);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(player.x + 16, player.y + bounce);
+    ctx.lineTo(player.x + 16 + legMove, player.y + 15 + bounce);
+    ctx.stroke();
+
+    // arms
+    ctx.beginPath();
+    ctx.moveTo(player.x + 2, player.y - 20 + bounce);
+    ctx.lineTo(player.x - 8, player.y - 10 + bounce);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(player.x + 22, player.y - 20 + bounce);
+    ctx.lineTo(player.x + 32, player.y - 10 + bounce);
+    ctx.stroke();
 }
 
+/* GROUND */
 function drawGround() {
+
     ctx.fillStyle = "green";
     ctx.fillRect(0, 350, canvas.width, 50);
 }
 
-/* LOOP */
+/* GAME LOOP */
 function loop() {
+
     if (!gameRunning) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    drawClouds(); // ☁️ ADDED HERE
+    drawClouds();
     drawGround();
 
-    if (keys["ArrowRight"]) player.x += 5;
-    if (keys["ArrowLeft"]) player.x -= 5;
+    /* MOVEMENT */
+    if (keys["ArrowRight"]) {
+        player.x += 5;
+    }
+
+    if (keys["ArrowLeft"]) {
+        player.x -= 5;
+    }
 
     if (keys["ArrowUp"] && player.onGround) {
         player.dy = -12;
         player.onGround = false;
     }
 
+    /* GRAVITY */
     player.dy += gravity;
     player.y += player.dy;
 
@@ -203,48 +288,68 @@ function loop() {
 
     /* HEARTS */
     hearts.forEach((h, i) => {
+
+        ctx.font = "28px Arial";
         ctx.fillText("❤️", h.x, h.y);
 
-        if (Math.abs(player.x - h.x) < 20 && Math.abs(player.y - h.y) < 20) {
+        if (
+            Math.abs(player.x - h.x) < 25 &&
+            Math.abs(player.y - h.y) < 25
+        ) {
             hearts.splice(i, 1);
             score++;
+
             document.getElementById("score").innerText = score;
         }
     });
 
     /* SPIKES */
     spikes.forEach(s => {
+
+        ctx.font = "30px Arial";
         ctx.fillText("💀", s.x, s.y);
 
-        if (Math.abs(player.x - s.x) < 20 && Math.abs(player.y - s.y) < 20) {
+        if (
+            Math.abs(player.x - s.x) < 25 &&
+            Math.abs(player.y - s.y) < 25
+        ) {
             gameRunning = false;
             document.getElementById("gameover").style.display = "block";
         }
     });
 
+    /* GIFT */
+    ctx.font = "32px Arial";
     ctx.fillText("🎁", goal.x, goal.y);
 
+    /* WIN */
     if (player.x > goal.x && score >= 5) {
+
         gameRunning = false;
+
         document.getElementById("message").style.display = "block";
     }
 
     drawPlayer();
+
     requestAnimationFrame(loop);
 }
 
 /* RESET */
 function resetGame() {
+
     init();
     loop();
 }
 
 /* START */
-window.onload = function () {
+window.onload = function() {
+
     initCanvas();
     init();
     loop();
 };
+
 </script>
 
 </body>
