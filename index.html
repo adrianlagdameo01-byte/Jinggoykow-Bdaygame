@@ -1,30 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>For Jinggoykow 💖</title>
+
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+    background: linear-gradient(#87CEEB, #ffffff);
+    font-family: Arial;
+}
+
+canvas {
+    display: block;
+}
+
+#ui {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 22px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 4px black;
+    z-index: 10;
+}
+
+#message, #gameover {
+    display: none;
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 20px;
+    border-radius: 20px;
+    max-width: 700px;
+    width: 85%;
+    text-align: center;
+    max-height: 70vh;
+    overflow-y: auto;
+    z-index: 20;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+button {
+    padding: 12px 22px;
+    font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    background: hotpink;
+    color: white;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div id="ui">❤️ Hearts: <span id="score">0</span> / 5</div>
+
+<canvas id="game"></canvas>
+
+<div id="message">
+<h2>🎉 You unlocked your surprise 💖</h2>
+
+<p style="line-height:1.6;">
+✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎉🎂🎈🎊🎁🍾🪅🪩 ✨✨✨
+<br><br>
+
+Tanda mo naaaaaa! Char lang 🤭 But seriously, I really wish I could spend this whole day with you, especially ngayon na birthday mo.
+<br><br>
+
+Aside from good health and more blessings sa work, I’m always praying for your safety and genuine happiness. May God continue to give you wisdom as you lead His church and ministry.
+<br><br>
+
+I know lately hindi tayo masyadong nagkakausap, and I take responsibility for that.
+<br><br>
+
+But one thing’s for sure—hihintayin kita.
+Kasi mahal na mahal kita, Jinggoykow. ❤️
+<br><br>
+
+—Maximow 🥰
+</p>
+
+</div>
+
+<div id="gameover">
+<h2>💀 Ouch! Try Again 😅</h2>
+<button onclick="resetGame()">Try Again</button>
+</div>
+
 <script>
 
-window.addEventListener("load", () => {
-
-let canvas = document.getElementById("game");
-let ctx = canvas.getContext("2d");
-
-function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-resize();
-window.addEventListener("resize", resize);
-
-/* GAME STATE */
+let canvas, ctx;
 let player, hearts, spikes, goal, score;
 let gravity = 0.6;
 let keys = {};
 let gameRunning = true;
+
 let clouds = [];
 
 /* INIT */
+function initCanvas() {
+
+    canvas = document.getElementById("game");
+    ctx = canvas.getContext("2d");
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
 function init() {
 
     player = {
         x: 50,
-        y: canvas.height - 100,
+        y: 300,
         dy: 0,
         onGround: false
     };
@@ -42,12 +135,17 @@ function init() {
         {x:900, y:330}
     ];
 
-    goal = { x:1200, y:300 };
+    goal = {
+        x:1200,
+        y:300
+    };
 
     clouds = [
         {x:100, y:80},
         {x:350, y:120},
-        {x:700, y:60}
+        {x:700, y:60},
+        {x:1050, y:100},
+        {x:1400, y:70}
     ];
 
     score = 0;
@@ -58,89 +156,103 @@ function init() {
     document.getElementById("gameover").style.display = "none";
 }
 
-/* SAFE INPUT (NO CRASH) */
-document.addEventListener("keydown", e => keys[e.key] = true);
-document.addEventListener("keyup", e => keys[e.key] = false);
+/* INPUT */
+document.addEventListener("keydown", e => {
+    keys[e.key] = true;
+});
 
-/* SAFE TOUCH CONTROLS */
-function bindTouch(id, key) {
-    const el = document.getElementById(id);
-    if (!el) return;
-
-    el.addEventListener("touchstart", e => {
-        e.preventDefault();
-        keys[key] = true;
-    });
-
-    el.addEventListener("touchend", e => {
-        e.preventDefault();
-        keys[key] = false;
-    });
-}
-
-bindTouch("left", "left");
-bindTouch("right", "right");
-bindTouch("jump", "jump");
+document.addEventListener("keyup", e => {
+    keys[e.key] = false;
+});
 
 /* CLOUDS */
 function drawClouds() {
+
     for (let c of clouds) {
 
         ctx.fillStyle = "rgba(255,255,255,0.9)";
+
         ctx.beginPath();
         ctx.arc(c.x, c.y, 25, 0, Math.PI * 2);
         ctx.arc(c.x + 25, c.y + 10, 30, 0, Math.PI * 2);
         ctx.arc(c.x + 55, c.y, 25, 0, Math.PI * 2);
+        ctx.arc(c.x + 25, c.y - 10, 22, 0, Math.PI * 2);
         ctx.fill();
 
-        c.x -= 0.3;
+        c.x -= 0.35;
 
-        if (c.x < -100) {
-            c.x = canvas.width + 100;
+        if (c.x < -120) {
+            c.x = canvas.width + 120;
+            c.y = 40 + Math.random() * 120;
         }
     }
 }
 
-/* PLAYER (LEG FIXED) */
+/* PLAYER */
 function drawPlayer() {
 
     let bounce = Math.sin(Date.now() * 0.015) * 2;
 
-    let px = player.x;
-    let py = player.y + bounce;
-
+    // body
     ctx.fillStyle = "#ff69b4";
-    ctx.fillRect(px, py - 35, 24, 35);
+    ctx.fillRect(player.x, player.y - 35 + bounce, 24, 35);
 
+    // face
     ctx.fillStyle = "#f5cba7";
     ctx.beginPath();
-    ctx.arc(px + 12, py - 45, 10, 0, Math.PI * 2);
+    ctx.arc(player.x + 12, player.y - 45 + bounce, 10, 0, Math.PI * 2);
     ctx.fill();
 
-    /* LEGS */
+    // hair
+    ctx.fillStyle = "#5d4037";
+    ctx.beginPath();
+    ctx.arc(player.x + 12, player.y - 48 + bounce, 11, Math.PI, 0);
+    ctx.fill();
+
+    // skirt
+    ctx.fillStyle = "#ff1493";
+    ctx.beginPath();
+    ctx.moveTo(player.x + 2, player.y - 5 + bounce);
+    ctx.lineTo(player.x + 22, player.y - 5 + bounce);
+    ctx.lineTo(player.x + 12, player.y + 8 + bounce);
+    ctx.fill();
+
+    // moving legs
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 2;
 
     let legMove = Math.sin(Date.now() * 0.02) * 4;
 
     ctx.beginPath();
-    ctx.moveTo(px + 8, py);
-    ctx.lineTo(px + 8 - legMove, py + 15);
+    ctx.moveTo(player.x + 8, player.y + bounce);
+    ctx.lineTo(player.x + 8 - legMove, player.y + 15 + bounce);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(px + 16, py);
-    ctx.lineTo(px + 16 + legMove, py + 15);
+    ctx.moveTo(player.x + 16, player.y + bounce);
+    ctx.lineTo(player.x + 16 + legMove, player.y + 15 + bounce);
+    ctx.stroke();
+
+    // arms
+    ctx.beginPath();
+    ctx.moveTo(player.x + 2, player.y - 20 + bounce);
+    ctx.lineTo(player.x - 8, player.y - 10 + bounce);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(player.x + 22, player.y - 20 + bounce);
+    ctx.lineTo(player.x + 32, player.y - 10 + bounce);
     ctx.stroke();
 }
 
 /* GROUND */
 function drawGround() {
+
     ctx.fillStyle = "green";
-    ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+    ctx.fillRect(0, 350, canvas.width, 50);
 }
 
-/* LOOP */
+/* GAME LOOP */
 function loop() {
 
     if (!gameRunning) return;
@@ -150,11 +262,16 @@ function loop() {
     drawClouds();
     drawGround();
 
-    /* MOVE */
-    if (keys["ArrowRight"] || keys.right) player.x += 5;
-    if (keys["ArrowLeft"] || keys.left) player.x -= 5;
+    /* MOVEMENT */
+    if (keys["ArrowRight"]) {
+        player.x += 5;
+    }
 
-    if ((keys["ArrowUp"] || keys.jump) && player.onGround) {
+    if (keys["ArrowLeft"]) {
+        player.x -= 5;
+    }
+
+    if (keys["ArrowUp"] && player.onGround) {
         player.dy = -12;
         player.onGround = false;
     }
@@ -163,10 +280,8 @@ function loop() {
     player.dy += gravity;
     player.y += player.dy;
 
-    let groundY = canvas.height - 50;
-
-    if (player.y >= groundY - 30) {
-        player.y = groundY - 30;
+    if (player.y >= 320) {
+        player.y = 320;
         player.dy = 0;
         player.onGround = true;
     }
@@ -177,19 +292,27 @@ function loop() {
         ctx.font = "28px Arial";
         ctx.fillText("❤️", h.x, h.y);
 
-        if (Math.abs(player.x - h.x) < 25) {
+        if (
+            Math.abs(player.x - h.x) < 25 &&
+            Math.abs(player.y - h.y) < 25
+        ) {
             hearts.splice(i, 1);
             score++;
+
             document.getElementById("score").innerText = score;
         }
     });
 
     /* SPIKES */
     spikes.forEach(s => {
+
         ctx.font = "30px Arial";
         ctx.fillText("💀", s.x, s.y);
 
-        if (Math.abs(player.x - s.x) < 25) {
+        if (
+            Math.abs(player.x - s.x) < 25 &&
+            Math.abs(player.y - s.y) < 25
+        ) {
             gameRunning = false;
             document.getElementById("gameover").style.display = "block";
         }
@@ -201,18 +324,33 @@ function loop() {
 
     /* WIN */
     if (player.x > goal.x && score >= 5) {
+
         gameRunning = false;
+
         document.getElementById("message").style.display = "block";
     }
 
     drawPlayer();
+
     requestAnimationFrame(loop);
 }
 
-/* START */
-init();
-loop();
+/* RESET */
+function resetGame() {
 
-});
+    init();
+    loop();
+}
+
+/* START */
+window.onload = function() {
+
+    initCanvas();
+    init();
+    loop();
+};
 
 </script>
+
+</body>
+</html>
