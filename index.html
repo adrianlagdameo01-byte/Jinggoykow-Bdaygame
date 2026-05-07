@@ -19,6 +19,7 @@ canvas {
     display: block;
 }
 
+/* UI */
 #ui {
     position: absolute;
     top: 10px;
@@ -30,32 +31,33 @@ canvas {
     z-index: 10;
 }
 
+/* MESSAGE BOX */
 #message, #gameover {
     display: none;
     position: absolute;
-    top: 10%;
+    top: 8%;
     left: 50%;
     transform: translateX(-50%);
     background: white;
-    padding: 20px;
+    padding: 15px;
     border-radius: 20px;
-    width: 85%;
     max-width: 700px;
+    width: 90%;
     text-align: center;
-    max-height: 70vh;
+    max-height: 75vh;
     overflow-y: auto;
     z-index: 20;
     box-shadow: 0 0 20px rgba(0,0,0,0.3);
 }
 
+/* BUTTONS */
 button {
-    padding: 12px 22px;
+    padding: 12px 20px;
     font-size: 16px;
     border: none;
     border-radius: 10px;
     background: hotpink;
     color: white;
-    cursor: pointer;
 }
 
 /* MOBILE CONTROLS */
@@ -64,20 +66,20 @@ button {
     bottom: 20px;
     width: 100%;
     display: flex;
-    justify-content: center;
-    gap: 20px;
-    z-index: 15;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 30;
 }
 
-.ctrl {
+.control-btn {
     width: 70px;
     height: 70px;
-    background: rgba(255,255,255,0.7);
     border-radius: 50%;
-    font-size: 22px;
-    text-align: center;
-    line-height: 70px;
-    user-select: none;
+    font-size: 24px;
+    background: rgba(255,105,180,0.8);
+    color: white;
+    border: none;
+    touch-action: none;
 }
 </style>
 </head>
@@ -90,22 +92,26 @@ button {
 
 <!-- MOBILE CONTROLS -->
 <div id="controls">
-    <div class="ctrl" id="left">⬅️</div>
-    <div class="ctrl" id="jump">⬆️</div>
-    <div class="ctrl" id="right">➡️</div>
+    <button class="control-btn" id="left">⬅</button>
+    <button class="control-btn" id="jump">⬆</button>
+    <button class="control-btn" id="right">➡</button>
 </div>
 
 <div id="message">
 <h2>🎉 You unlocked your surprise 💖</h2>
-<p>
-✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎂✨✨✨
+<p style="line-height:1.6;">
+✨✨✨ Happy 35th Birthday, Jinggoykow! 🥳🎉🎂🎈🎊🎁🍾🪅🪩 ✨✨✨
 <br><br>
-Mahal na mahal kita ❤️
+Tanda mo naaaaaa! Char lang 🤭 But seriously, I really wish I could spend this whole day with you, especially ngayon na birthday mo.
+<br><br>
+Aside from good health and more blessings sa work, I’m always praying for your safety and genuine happiness.
+<br><br>
+—Maximow 🥰
 </p>
 </div>
 
 <div id="gameover">
-<h2>💀 Try Again 😅</h2>
+<h2>💀 Ouch! Try Again 😅</h2>
 <button onclick="resetGame()">Try Again</button>
 </div>
 
@@ -116,51 +122,56 @@ let player, hearts, spikes, goal, score;
 let gravity = 0.6;
 let keys = {};
 let gameRunning = true;
+let clouds = [];
 
-let groundY;
+let groundBase = 350;
+let shiftY = 0;
 
 /* INIT CANVAS */
 function initCanvas() {
     canvas = document.getElementById("game");
     ctx = canvas.getContext("2d");
-
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
+    resize();
 }
 
-function resizeCanvas() {
+/* RESPONSIVE FIX */
+function resize() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    groundY = canvas.height - 100;
+
+    shiftY = (canvas.height - 50) - groundBase;
 }
+
+window.addEventListener("resize", resize);
+window.addEventListener("orientationchange", resize);
 
 /* INIT GAME */
 function init() {
 
-    player = {
-        x: 50,
-        y: groundY,
-        dy: 0,
-        onGround: false
-    };
+    player = { x: 50, y: 300 + shiftY, dy: 0, onGround: false };
 
     hearts = [
-        {x:200, y:groundY},
-        {x:400, y:groundY-50},
-        {x:600, y:groundY},
-        {x:800, y:groundY-80},
-        {x:1000, y:groundY}
+        {x:200, y:300 + shiftY},
+        {x:400, y:250 + shiftY},
+        {x:600, y:300 + shiftY},
+        {x:800, y:220 + shiftY},
+        {x:1000, y:300 + shiftY}
     ];
 
     spikes = [
-        {x:500, y:groundY},
-        {x:900, y:groundY}
+        {x:500, y:330 + shiftY},
+        {x:900, y:330 + shiftY}
     ];
 
-    goal = {
-        x:1200,
-        y:groundY
-    };
+    goal = { x:1200, y:300 + shiftY };
+
+    clouds = [
+        {x:100, y:80},
+        {x:350, y:120},
+        {x:700, y:60},
+        {x:1050, y:100},
+        {x:1400, y:70}
+    ];
 
     score = 0;
     gameRunning = true;
@@ -170,16 +181,12 @@ function init() {
     document.getElementById("gameover").style.display = "none";
 }
 
-/* INPUT (KEYBOARD) */
-document.addEventListener("keydown", e => keys[e.key] = true);
-document.addEventListener("keyup", e => keys[e.key] = false);
-
 /* TOUCH CONTROLS */
-document.getElementById("left").ontouchstart = () => keys["ArrowLeft"] = true;
-document.getElementById("left").ontouchend = () => keys["ArrowLeft"] = false;
+document.getElementById("left").ontouchstart = () => keys["left"] = true;
+document.getElementById("left").ontouchend = () => keys["left"] = false;
 
-document.getElementById("right").ontouchstart = () => keys["ArrowRight"] = true;
-document.getElementById("right").ontouchend = () => keys["ArrowRight"] = false;
+document.getElementById("right").ontouchstart = () => keys["right"] = true;
+document.getElementById("right").ontouchend = () => keys["right"] = false;
 
 document.getElementById("jump").ontouchstart = () => {
     if (player.onGround) {
@@ -188,22 +195,53 @@ document.getElementById("jump").ontouchstart = () => {
     }
 };
 
-/* DRAW PLAYER */
+/* KEYBOARD */
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
+
+/* CLOUDS */
+function drawClouds() {
+    for (let c of clouds) {
+
+        ctx.fillStyle = "rgba(255,255,255,0.9)";
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, 25, 0, Math.PI * 2);
+        ctx.arc(c.x + 25, c.y + 10, 30, 0, Math.PI * 2);
+        ctx.arc(c.x + 55, c.y, 25, 0, Math.PI * 2);
+        ctx.arc(c.x + 25, c.y - 10, 22, 0, Math.PI * 2);
+        ctx.fill();
+
+        c.x -= 0.35;
+
+        if (c.x < -120) {
+            c.x = canvas.width + 120;
+        }
+    }
+}
+
+/* PLAYER */
 function drawPlayer() {
 
+    let bounce = Math.sin(Date.now() * 0.015) * 2;
+
     ctx.fillStyle = "#ff69b4";
-    ctx.fillRect(player.x, player.y - 35, 24, 35);
+    ctx.fillRect(player.x, player.y - 35 + bounce, 24, 35);
 
     ctx.fillStyle = "#f5cba7";
     ctx.beginPath();
-    ctx.arc(player.x + 12, player.y - 45, 10, 0, Math.PI * 2);
+    ctx.arc(player.x + 12, player.y - 45 + bounce, 10, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#5d4037";
+    ctx.beginPath();
+    ctx.arc(player.x + 12, player.y - 48 + bounce, 11, Math.PI, 0);
     ctx.fill();
 }
 
 /* GROUND */
 function drawGround() {
     ctx.fillStyle = "green";
-    ctx.fillRect(0, groundY, canvas.width, 100);
+    ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
 }
 
 /* LOOP */
@@ -213,11 +251,12 @@ function loop() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    drawClouds();
     drawGround();
 
     /* movement */
-    if (keys["ArrowRight"]) player.x += 5;
-    if (keys["ArrowLeft"]) player.x -= 5;
+    if (keys["ArrowRight"] || keys["right"]) player.x += 5;
+    if (keys["ArrowLeft"] || keys["left"]) player.x -= 5;
 
     if (keys["ArrowUp"] && player.onGround) {
         player.dy = -12;
@@ -228,14 +267,17 @@ function loop() {
     player.dy += gravity;
     player.y += player.dy;
 
-    if (player.y >= groundY) {
-        player.y = groundY;
+    let groundY = canvas.height - 50;
+
+    if (player.y >= groundY - 30) {
+        player.y = groundY - 30;
         player.dy = 0;
         player.onGround = true;
     }
 
     /* hearts */
     hearts.forEach((h, i) => {
+
         ctx.font = "28px Arial";
         ctx.fillText("❤️", h.x, h.y);
 
@@ -248,6 +290,8 @@ function loop() {
 
     /* spikes */
     spikes.forEach(s => {
+
+        ctx.font = "30px Arial";
         ctx.fillText("💀", s.x, s.y);
 
         if (Math.abs(player.x - s.x) < 25 && Math.abs(player.y - s.y) < 25) {
@@ -256,16 +300,17 @@ function loop() {
         }
     });
 
-    /* goal */
+    /* gift */
+    ctx.font = "32px Arial";
     ctx.fillText("🎁", goal.x, goal.y);
 
+    /* win */
     if (player.x > goal.x && score >= 5) {
         gameRunning = false;
         document.getElementById("message").style.display = "block";
     }
 
     drawPlayer();
-
     requestAnimationFrame(loop);
 }
 
