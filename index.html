@@ -179,8 +179,7 @@ function initCanvas() {
 /* INIT */
 function init() {
 
-    // dynamic floor
-    let floor = canvas.height - 120;
+    floor = canvas.height - 140;
 
     player = {
         x: 50,
@@ -189,22 +188,19 @@ function init() {
         onGround: false
     };
 
-    // LOWER hearts so they're visible
     hearts = [
-        {x: 200, y: floor - 20},
-        {x: 400, y: floor - 50},
-        {x: 600, y: floor - 20},
-        {x: 800, y: floor - 70},
-        {x: 1000, y: floor - 20}
+        {x: 200, y: floor - 30},
+        {x: 400, y: floor - 80},
+        {x: 600, y: floor - 30},
+        {x: 800, y: floor - 100},
+        {x: 1000, y: floor - 30}
     ];
 
-    // skulls ABOVE ground
     spikes = [
-        {x: 500, y: floor + 10},
-        {x: 900, y: floor + 10}
+        {x: 500, y: floor + 5},
+        {x: 900, y: floor + 5}
     ];
 
-    // gift visible
     goal = {
         x: 1200,
         y: floor - 10
