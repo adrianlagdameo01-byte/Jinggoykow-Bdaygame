@@ -165,7 +165,7 @@ function init() {
 
     player = { x: 50, y: 300, dy: 0, onGround: false };
 
-    dog = { x: 20, y: 320, dir: 1 };
+    dog = { x: 20, y: 338, dir: 1 };
 
     hearts = [
         {x:200, y:300},
@@ -308,7 +308,7 @@ function loop() {
     let bob = Math.sin(Date.now()*0.02) * 1.5;
 
     let dx = dog.x;
-    let dy = dog.y + bob;
+    let dy = dog.y;
     // 🐶 DOG SPEECH BUBBLE
 ctx.save();
 
