@@ -428,8 +428,8 @@ let px = player.x;
 let py = player.y + bounce;
 
 ctx.save();
-ctx.translate(px, py);
-ctx.scale(dir === -1 ? -1 : 1, 1);
+ctx.translate(px, py);let facing = dir === -1 ? -1 : 1;
+ctx.scale(facing, 1);
 
 /* HAIR BACK */
 ctx.fillStyle = "#3b2a1f";
@@ -485,34 +485,65 @@ ctx.fill();
 /* eyes */
 ctx.fillStyle = "#000";
 
+/* LEFT EYE */
 ctx.beginPath();
 ctx.arc(8, -46, 1.5, 0, Math.PI * 2);
 ctx.fill();
 
+/* RIGHT EYE */
 ctx.beginPath();
 ctx.arc(16, -46, 1.5, 0, Math.PI * 2);
 ctx.fill();
 
-/* smile */
+/* nose */
+ctx.beginPath();
+ctx.arc(13, -43, 1, 0, Math.PI * 2);
+ctx.fill();
+
+/* smile / awe expression */
 ctx.strokeStyle = "#000";
 ctx.lineWidth = 1.5;
 
-ctx.beginPath();
-ctx.arc(12, -41, 4, 0.2, Math.PI - 0.2);
-ctx.stroke();
+if (!player.onGround) {
 
+    /* 😮 awe face while jumping */
+    ctx.beginPath();
+    ctx.arc(12, -38, 3, 0, Math.PI * 2);
+    ctx.stroke();
+
+} else {
+
+    /* 😊 normal smile */
+    ctx.beginPath();
+    ctx.arc(12, -41, 4, 0.2, Math.PI - 0.2);
+    ctx.stroke();
+}
 /* glasses */
 ctx.strokeStyle = "#000";
 ctx.lineWidth = 2;
 
-ctx.beginPath();
-ctx.arc(8, -45, 4, 0, Math.PI*2);
-ctx.stroke();
+/* when facing RIGHT */
+if (facing === 1) {
 
-ctx.beginPath();
-ctx.arc(16, -45, 4, 0, Math.PI*2);
-ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(8, -45, 4, 0, Math.PI*2);
+    ctx.stroke();
 
+    ctx.beginPath();
+    ctx.arc(16, -45, 4, 0, Math.PI*2);
+    ctx.stroke();
+
+} else {
+
+    /* mirrored glasses when facing LEFT */
+    ctx.beginPath();
+    ctx.arc(16, -45, 4, 0, Math.PI*2);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(8, -45, 4, 0, Math.PI*2);
+    ctx.stroke();
+}
 /* LEFT ARM */
 ctx.strokeStyle = "#f5cba7";
 ctx.lineWidth = 3;
