@@ -473,15 +473,34 @@ ctx.quadraticCurveTo(12, 40, 24, 30);
 ctx.quadraticCurveTo(34, 10, 12, 0);
 ctx.fill();
 
-/* body */
+/* neck removed + softer upper body */
 ctx.fillStyle = "#f5cba7";
-ctx.fillRect(6, -30, 12, 12);
+
+ctx.beginPath();
+ctx.roundRect(7, -28, 10, 10, 4);
+ctx.fill();
 
 /* head */
 ctx.beginPath();
 ctx.arc(12, -45, 12, 0, Math.PI*2);
 ctx.fill();
 
+/* 👒 fisherman's hat (cream) */
+ctx.fillStyle = "#f5e6c8";
+
+/* top of hat */
+ctx.beginPath();
+ctx.ellipse(12, -58, 11, 6, 0, 0, Math.PI * 2);
+ctx.fill();
+
+/* hat brim */
+ctx.beginPath();
+ctx.ellipse(12, -52, 18, 5, 0, 0, Math.PI * 2);
+ctx.fill();
+
+/* black ribbon */
+ctx.fillStyle = "#222";
+ctx.fillRect(2, -57, 20, 4);
 /* eyes */
 ctx.fillStyle = "#000";
 
