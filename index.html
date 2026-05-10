@@ -428,8 +428,22 @@ let px = player.x;
 let py = player.y + bounce;
 
 ctx.save();
-ctx.translate(px, py);let facing = dir === -1 ? -1 : 1;
+ctx.translate(px, py);
+
+let facing = dir === -1 ? -1 : 1;
 ctx.scale(facing, 1);
+
+/* body lean depending on direction */
+if (facing === 1) {
+
+    /* facing right */
+    ctx.transform(1, 0, -0.08, 1, 0, 0);
+
+} else {
+
+    /* facing left */
+    ctx.transform(1, 0, 0.08, 1, 0, 0);
+}
 
 /* HAIR BACK */
 ctx.fillStyle = "#3b2a1f";
@@ -473,15 +487,23 @@ ctx.quadraticCurveTo(12, 40, 24, 30);
 ctx.quadraticCurveTo(34, 10, 12, 0);
 ctx.fill();
 
-/* body */
+/* SIDEWAYS BODY */
 ctx.fillStyle = "#f5cba7";
-ctx.fillRect(6, -30, 12, 12);
 
-/* head */
 ctx.beginPath();
-ctx.arc(12, -45, 12, 0, Math.PI*2);
+ctx.roundRect(6, -30, 10, 14, 4);
 ctx.fill();
 
+/* SIDEWAYS HEAD */
+ctx.beginPath();
+ctx.ellipse(12, -45, 10, 12, 0, 0, Math.PI * 2);
+ctx.fill();
+
+/* little cheek */
+ctx.fillStyle = "#f2b6b6";
+ctx.beginPath();
+ctx.arc(18, -42, 2, 0, Math.PI * 2);
+ctx.fill();
 /* eyes */
 ctx.fillStyle = "#000";
 
